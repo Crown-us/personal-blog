@@ -105,39 +105,39 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         categoryName: "Alat AI"
       },
       "ext-2": {
-        name: "Grammarly: Asisten Menulis & AI",
-        tagline: "Tingkatkan gaya penulisan Anda, perbaiki kesalahan tata bahasa, dan buat balasan dengan bantuan kecerdasan buatan.",
-        description: "Dari email hingga media sosial, Grammarly membantu Anda menulis dengan jelas dan percaya diri. Alat ini bekerja lebih jauh dari sekadar pemeriksa tata bahasa tradisional, menawarkan koreksi ejaan kontekstual, koreksi tanda baca, deteksi nada, dan saran penulisan ulang. Fitur GrammarlyGO yang terintegrasi memungkinkan Anda menulis draf, menulis ulang, mencari ide, dan membalas dengan prompt AI kustom.",
-        trustBadge: "Disetujui Editor",
-        categoryName: "Penulisan"
+        name: "Monica - Copilot AI Anda",
+        tagline: "Chat dengan GPT-4, Claude 3.5, dan Gemini. Cari, tulis, terjemahkan, dan tangkap halaman web dengan mudah.",
+        description: "Monica adalah asisten AI all-in-one Anda, dilengkapi dengan model LLM canggih (GPT-4, Claude 3, Gemini). Cukup tekan Cmd+M atau Ctrl+M untuk mengobrol dengan Monica, menulis blog, merangkum artikel, menerjemahkan PDF, atau mencari web dengan wawasan AI instan. Sangat cocok untuk pembuat konten dan tugas browser harian.",
+        trustBadge: "Pilihan Editor",
+        categoryName: "Alat AI"
       },
       "ext-3": {
-        name: "LanguageTool: Tata Bahasa Multibahasa",
-        tagline: "Pemeriksa ejaan dan tata bahasa open-source yang mendukung 30+ bahasa. Alternatif yang berfokus pada privasi.",
-        description: "Pendamping menulis open-source dan privat. LanguageTool mendeteksi banyak kesalahan yang tidak bisa dideteksi oleh pemeriksa ejaan biasa, seperti masalah tata bahasa, gaya penulisan, dan kebingungan pilihan kata. Berbeda dengan ekstensi lainnya, LanguageTool memprioritaskan privasi Anda.",
-        trustBadge: "Terbaik Untuk Pelajar",
-        categoryName: "Penulisan"
+        name: "Perplexity - Pendamping Pencarian AI",
+        tagline: "Dapatkan jawaban instan dengan kutipan sumber untuk setiap pertanyaan langsung di browser Anda.",
+        description: "Perplexity AI menggantikan pencarian tradisional dengan jawaban instan, interaktif, dan dikutip sepenuhnya. Sorot teks apa saja atau ajukan pertanyaan langsung. Perplexity mencari web secara langsung, menyusun sumber daya terbaik, dan menyintesis jawaban bersih dengan kutipan sumber. Sangat berguna untuk riset.",
+        trustBadge: "Terbaik Untuk Riset",
+        categoryName: "Alat AI"
       },
       "ext-4": {
-        name: "Loom: Perekam Layar & Berbagi Video",
-        tagline: "Rekam layar dan kamera Anda dengan satu klik. Bagikan video secara instan menggunakan tautan yang disalin otomatis.",
-        description: "Cara tercepat untuk menjelaskan apa pun dengan video. Rekam layar, kamera, mikrofon, dan audio internal Anda dengan overlay khusus. Begitu Anda berhenti merekam, video Anda diunggah dan tautan yang bisa dibagikan langsung disalin ke clipboard Anda.",
-        trustBadge: "Favorit Komunitas",
-        categoryName: "Produktivitas"
+        name: "Merlin - Asisten ChatGPT di Chrome",
+        tagline: "Rangkum video YouTube, terjemahkan artikel, dan buat balasan LinkedIn & Gmail instan dengan AI.",
+        description: "Merlin adalah asisten ChatGPT kustom Anda di Chrome. Dengan Merlin, Anda dapat merangkum video YouTube panjang dalam sekali klik, menulis postingan LinkedIn dengan konversi tinggi, membalas email di Gmail secara profesional, dan mendapatkan respon GPT-4 di samping hasil Google Search.",
+        trustBadge: "Favorit Profesional",
+        categoryName: "Alat AI"
       },
       "ext-5": {
-        name: "uBlock Origin: Pemblokir Konten Terbaik",
-        tagline: "Pemblokir konten yang efisien dan open-source. Ringan di memori CPU sekaligus memblokir pelacak dan iklan.",
-        description: "Berbeda dengan pemblokir iklan lainnya, uBlock Origin tidak berpartisipasi dalam program 'Iklan yang Dapat Diterima'. Alat ini memblokir iklan, pelacak, domain malware, dan pop-up langsung dari awal menggunakan daftar filter yang dikuratori komunitas. Sangat ringan, menggunakan memori dan sumber daya CPU minimal.",
-        trustBadge: "Sedang Tren Minggu Ini",
-        categoryName: "Privasi & Keamanan"
+        name: "Sider - Sidebar AI & Penerjemah",
+        tagline: "Pendamping AI untuk membaca, menulis, dan coding. Terjemahkan teks dan jelaskan logika di halaman mana saja.",
+        description: "Sider adalah sidebar browser cerdas yang dirancang untuk membantu aktivitas membaca, menulis, dan pemrograman harian Anda. Didukung oleh GPT-4, Claude, dan Gemini untuk menjelaskan blok kode yang rumit, memeriksa kesalahan tata bahasa, menulis draf teks, dan menyediakan terjemahan bahasa akurat.",
+        trustBadge: "Populer Minggu Ini",
+        categoryName: "Alat AI"
       },
       "ext-6": {
-        name: "Wappalyzer - Profiler Teknologi",
-        tagline: "Temukan teknologi apa yang digunakan untuk membangun situs web secara instan. Deteksi CMS, pustaka, server, dan widget.",
-        description: "Wappalyzer adalah utilitas yang mengungkap teknologi yang digunakan di situs web. Alat ini mendeteksi sistem manajemen konten, platform e-commerce, framework web, perangkat lunak server, alat analitik, dan banyak lagi.",
-        trustBadge: "Terbaik Untuk Developer",
-        categoryName: "Alat Developer"
+        name: "MaxAI.me - Gunakan AI 1-Klik di Mana Saja",
+        tagline: "Tulis ulang, ringkas, balas, dan terjemahkan teks instan di situs web mana pun dengan GPT-4 dan Claude.",
+        description: "MaxAI.me menghadirkan AI generatif 1-klik langsung di kursor browsing Anda. Sorot teks apa pun di situs web mana pun untuk menulis ulang, merangkum, memeriksa tata bahasa, menerjemahkan, atau membalas secara instan. Mendukung GPT-4, Claude 3, dan Gemini. Mempercepat pengerjaan email, dokumen, dan bacaan sosial.",
+        trustBadge: "Terbaik Untuk Produktivitas",
+        categoryName: "Alat AI"
       },
       "ext-7": {
         name: "Octotree: Pohon Kode GitHub",
