@@ -13,7 +13,8 @@ import {
   LayoutDashboard,
   Search,
   Layers,
-  Globe
+  Globe,
+  Rocket
 } from "lucide-react";
 import { navigation } from "@/config/navigation";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -52,12 +53,12 @@ export default function Navbar() {
         
         {/* Left Side: Logo & Links */}
         <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-1.5 font-bold text-sm tracking-tight text-foreground">
-            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary text-primary-foreground text-xs font-bold">
-              🚀
+          <Link href="/" className="flex items-center gap-2 font-bold tracking-tight text-foreground group">
+            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-tr from-red-500 to-primary text-white shadow-sm shadow-primary/10 group-hover:scale-105 group-hover:rotate-3 transition-all duration-300">
+              <Rocket className="h-3.5 w-3.5 fill-current" />
             </span>
-            <span>
-              Roket<span className="text-primary font-bold">Dev</span>
+            <span className="text-sm font-bold">
+              Roket<span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400 font-extrabold">Dev</span>
             </span>
           </Link>
 
