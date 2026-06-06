@@ -166,6 +166,48 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         description: "Pengelola sesi yang bersih dan cepat untuk pengguna tingkat lanjut. Alat ini memungkinkan pengembang untuk menyimpan grup tab browser yang terbuka sebagai sesi kustom, mencari tab aktif di seluruh jendela, dan memulihkan tab setelah sistem mogok.",
         trustBadge: "Disetujui Editor",
         categoryName: "Produktivitas"
+      },
+      "ext-11": {
+        name: "GitHub Copilot",
+        tagline: "Pair programmer AI Anda. Dapatkan saran autocomplete dan bantuan obrolan langsung saat menulis kode.",
+        description: "GitHub Copilot adalah alat pengembang AI yang paling banyak diadopsi di dunia. Alat ini memberikan saran bergaya autocomplete saat Anda menulis kode, mengubah komentar menjadi kode yang dapat dieksekusi, dan memungkinkan Anda mengobrol dengan asisten AI di editor untuk menyelesaikan masalah, menulis pengujian, dan memahami basis kode yang kompleks.",
+        trustBadge: "Disetujui Editor",
+        categoryName: "Alat Developer"
+      },
+      "ext-12": {
+        name: "Codeium",
+        tagline: "Pelengkapan otomatis dan pencarian kode AI gratis. Percepat alur kerja coding Anda dengan obrolan cerdas.",
+        description: "Codeium adalah alternatif gratis dan ultra-cepat untuk GitHub Copilot. Alat ini menawarkan pelengkapan otomatis kode baris tunggal dan multi-baris di lebih dari 70 bahasa, obrolan inline untuk merefaktor kode, dan pencarian konteks tingkat repositori untuk menjawab pertanyaan tentang seluruh basis kode Anda.",
+        trustBadge: "Alternatif Gratis Terbaik",
+        categoryName: "Alat Developer"
+      },
+      "ext-13": {
+        name: "Continue.dev",
+        tagline: "Asisten kode AI sumber terbuka (open-source). Hubungkan LLM apa pun ke IDE Anda dengan mudah.",
+        description: "Continue adalah asisten kode AI open-source terkemuka. Ini memungkinkan Anda membangun asisten pengembangan perangkat lunak kustom dengan menghubungkan LLM lokal (seperti Ollama, Llama3) atau model berbasis API (seperti GPT-4, Claude) untuk pelengkapan otomatis kode, refactoring inline, dan pemahaman kode.",
+        trustBadge: "Sumber Terbuka Terbaik",
+        categoryName: "Alat Developer"
+      },
+      "ext-14": {
+        name: "Tabnine",
+        tagline: "Asisten kode AI kelas perusahaan. Aman, privat, dan dilatih pada kode berlisensi permisif.",
+        description: "Tabnine adalah pelopor dalam pelengkapan kode AI yang berfokus pada keamanan dan kepatuhan. Tabnine menawarkan model AI privat yang dapat dijalankan secara lokal (on-premise) atau di cloud Anda, memastikan kode sumber Anda tidak pernah meninggalkan lingkungan aman Anda. Sangat cocok untuk tim perusahaan.",
+        trustBadge: "Paling Aman",
+        categoryName: "Alat Developer"
+      },
+      "ext-15": {
+        name: "Blackbox AI",
+        tagline: "Pencarian kode dan pelengkapan otomatis AI super cepat. Ubah pertanyaan menjadi kode secara instan.",
+        description: "Blackbox AI dibuat untuk mencari cuplikan kode di jutaan repositori. Alat ini memberikan saran pelengkapan otomatis di editor Anda dan dapat mengekstrak kode dari video dan gambar secara instan. Cepat, serbaguna, dan sangat andal untuk menyalin dan menemukan skrip.",
+        trustBadge: "Pencarian Kode Terbaik",
+        categoryName: "Alat Developer"
+      },
+      "ext-16": {
+        name: "CodeGeeX",
+        tagline: "Asisten coding AI multibahasa sumber terbuka. Terjemahkan kode antar bahasa pemrograman secara instan.",
+        description: "CodeGeeX adalah asisten coding AI multibahasa yang andal. Selain menulis boilerplate kode dan penjelasan, alat ini berspesialisasi dalam menerjemahkan blok kode dari satu bahasa pemrograman ke bahasa pemrograman lainnya dengan presisi tinggi (misal: Python ke Go) untuk mempercepat migrasi sistem.",
+        trustBadge: "Penerjemah Kode Terbaik",
+        categoryName: "Alat Developer"
       }
     };
 
