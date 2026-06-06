@@ -80,6 +80,33 @@ export const categories = [
     color: "#06b6d4",
     gradient: "from-cyan-500 to-blue-500",
   },
+  {
+    id: "content-creator",
+    slug: "content-creator",
+    name: "Content Creator",
+    description: "AI design, presentation, and media tools for digital marketers",
+    icon: "Video",
+    color: "#f43f5e",
+    gradient: "from-rose-500 to-pink-500",
+  },
+  {
+    id: "freelancer-toolkit",
+    slug: "freelancer-toolkit",
+    name: "Freelancer Toolkit",
+    description: "Screen recorders, web clippers, and tracking tools for remote workers",
+    icon: "Briefcase",
+    color: "#8b5cf6",
+    gradient: "from-purple-500 to-violet-500",
+  },
+  {
+    id: "seo-marketing",
+    slug: "seo-marketing",
+    name: "SEO & Marketing",
+    description: "Keyword metrics, competitor analytics, and SEO audits for bloggers",
+    icon: "BarChart3",
+    color: "#f59e0b",
+    gradient: "from-amber-500 to-yellow-500",
+  },
 ] as const;
 
 export type Category = (typeof categories)[number];

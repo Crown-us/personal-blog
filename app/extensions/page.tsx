@@ -48,6 +48,9 @@ export default function ExtensionsDirectory() {
       case "shopping": return "Belanja";
       case "news-reading": return "Berita & Bacaan";
       case "research-learning": return "Riset & Pembelajaran";
+      case "content-creator": return "Pembuat Konten";
+      case "freelancer-toolkit": return "Peralatan Freelancer";
+      case "seo-marketing": return "SEO & Pemasaran";
       default: return slug;
     }
   };

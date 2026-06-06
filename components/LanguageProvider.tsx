@@ -240,9 +240,156 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       "ext-21": {
         name: "YouTube Summary dengan ChatGPT",
         tagline: "Dapatkan transkrip dan ringkasan terstruktur instan untuk video YouTube menggunakan AI.",
-        description: "YouTube Summary menggunakan ChatGPT untuk menghasilkan transkrip dan ringkasan video perkuliahan, webinar, dan tutorial di YouTube. Menghemat waktu belajar mahasiswa dengan menyorot konsep inti dan penanda waktu (timestamps) secara instan.",
+        description: "YouTube Summary menggunakan ChatGPT to menghasilkan transkrip dan ringkasan video perkuliahan, webinar, dan tutorial di YouTube. Menghemat waktu belajar mahasiswa dengan menyorot konsep inti dan penanda waktu (timestamps) secara instan.",
         trustBadge: "Peringkas Video Terbaik",
         categoryName: "Riset & Pembelajaran"
+      },
+      "ext-22": {
+        name: "Grammarly",
+        tagline: "Asisten menulis AI. Perbaiki tata bahasa, periksa ejaan, dan sesuaikan nada di mana saja.",
+        description: "Grammarly adalah asisten menulis bertenaga AI yang menjaga email, artikel, dan proposal Anda bebas dari kesalahan. Alat ini menyorot masalah tata bahasa, kesalahan ejaan, dan menyarankan peningkatan struktural agar sesuai dengan nada bicara target.",
+        trustBadge: "Korektor Terbaik",
+        categoryName: "Penulisan"
+      },
+      "ext-23": {
+        name: "LanguageTool",
+        tagline: "Pemeriksa ejaan dan tata bahasa multibahasa. Sumber terbuka, privat, dan mendukung 30+ bahasa.",
+        description: "LanguageTool adalah pemeriksa tata bahasa sumber terbuka yang berfokus pada privasi. Sangat cocok untuk penulis yang menyusun teks dalam berbagai bahasa, menawarkan koreksi gaya dan saran sinonim dalam bahasa Inggris, Indonesia, Spanyol, Prancis, dan lainnya.",
+        trustBadge: "Multibahasa Terbaik",
+        categoryName: "Penulisan"
+      },
+      "ext-24": {
+        name: "QuillBot: AI Paraphrasing Tool",
+        tagline: "Parafrase, ringkas, dan terjemahkan teks Anda untuk menulis dengan lebih jelas.",
+        description: "QuillBot adalah alat parafrase AI canggih. Ini membantu mahasiswa dan profesional menulis ulang kalimat, paragraf, atau seluruh artikel untuk menghindari plagiarisme, meningkatkan kosakata, dan menemukan frasa sempurna untuk esai atau skripsi.",
+        trustBadge: "Parafrase Terbaik",
+        categoryName: "Penulisan"
+      },
+      "ext-25": {
+        name: "Wordtune: AI Writing Assistant",
+        tagline: "Parafrasekan pemikiran Anda menjadi tulisan yang jelas, menarik, dan profesional.",
+        description: "Wordtune menerjemahkan ide Anda menjadi kata-kata tertulis. Menawarkan saran penulisan ulang real-time, membantu Anda memilih antara nada formal, santai, diringkas, atau diperluas. Sangat cocok untuk menyusun proposal yang persuasif.",
+        trustBadge: "Parafrase Ide Terbaik",
+        categoryName: "Penulisan"
+      },
+      "ext-26": {
+        name: "Compose AI: Autocomplete Writing",
+        tagline: "Tulis email, dokumen, dan pesan obrolan 10x lebih cepat dengan pelengkapan otomatis AI.",
+        description: "Compose AI adalah ekstensi Chrome gratis yang mengotomatiskan penulisan Anda. Alat ini menggunakan AI generatif untuk melengkapi kalimat secara otomatis saat Anda mengetik di situs web mana pun.",
+        trustBadge: "Autocomplete Terbaik",
+        categoryName: "Penulisan"
+      },
+      "ext-27": {
+        name: "Canva: AI Graphic Design",
+        tagline: "Desain grafis media sosial, presentasi, dan mockup di browser Anda menggunakan AI.",
+        description: "Pendamping browser Canva memungkinkan freelancer pemasaran digital mengakses templat, menghasilkan grafis AI, menghapus latar belakang foto dalam satu klik, dan mengatur aset merek secara instan dari tab mana saja.",
+        trustBadge: "Terlaris",
+        categoryName: "Pembuat Konten"
+      },
+      "ext-28": {
+        name: "Gamma AI: Presentation Builder",
+        tagline: "Hasilkan presentasi, halaman web, dan dokumen indah dalam hitungan detik menggunakan AI.",
+        description: "Gamma AI membantu Anda membuat slide deck dan presentasi penjualan dengan satu perintah teks. Ini menangani pemformatan tata letak, desain visual, dan pengoptimalan teks, membiarkan freelancer membuat pitch dalam waktu singkat.",
+        trustBadge: "Pembuat Slide Terbaik",
+        categoryName: "Pembuat Konten"
+      },
+      "ext-29": {
+        name: "Tome: AI Storytelling & Decks",
+        tagline: "Bangun laporan interaktif kolaboratif dan slide presentasi dari kerangka tulisan.",
+        description: "Tome menggunakan AI generatif untuk merancang dan menulis slide, laporan, dan portofolio. Terintegrasi dengan alat seperti Figma, YouTube, dan Miro, menjadikannya utilitas bercerita yang ideal bagi kreator.",
+        trustBadge: "Disetujui Editor",
+        categoryName: "Pembuat Konten"
+      },
+      "ext-30": {
+        name: "Adobe Firefly: AI Art Generator",
+        tagline: "Hasilkan gambar, efek teks, dan pewarnaan ulang vektor langsung di browser Anda.",
+        description: "Adobe Firefly menawarkan model AI generatif yang aman secara komersial. Ketik prompt langsung di sidebar browser Anda untuk menghasilkan ilustrasi digital, menerapkan efek teks yang indah, dan mewarnai ulang aset vektor SVG.",
+        trustBadge: "AI Komersial Terbaik",
+        categoryName: "Pembuat Konten"
+      },
+      "ext-31": {
+        name: "Designs.ai: All-In-One Studio",
+        tagline: "Hasilkan logo, video, mockup, dan pengisi suara menggunakan templat AI.",
+        description: "Designs.ai menggabungkan algoritma cerdas untuk membangun aset visual. Buat logo merek, konversi teks-ke-video untuk iklan, dan hasilkan pengisi suara realistis untuk salinan pemasaran Anda dalam hitungan menit.",
+        trustBadge: "Sedang Tren",
+        categoryName: "Pembuat Konten"
+      },
+      "ext-32": {
+        name: "Loom: Perekam Layar & Editor Video",
+        tagline: "Rekam layar dan kamera Anda. Bagikan pesan video cepat dengan klien dan tim.",
+        description: "Loom adalah cara termudah untuk merekam video presentasi layar, pembaruan produk, atau laporan bug. Lewati rapat status yang panjang; rekam layar Anda, tambahkan kamera wajah, dan bagikan tautannya instan.",
+        trustBadge: "Perekam Video Terbaik",
+        categoryName: "Peralatan Freelancer"
+      },
+      "ext-33": {
+        name: "Notion Web Clipper",
+        tagline: "Simpan halaman web, artikel, atau sumber daya apa pun langsung ke ruang kerja Notion Anda.",
+        description: "Simpan semua bahan referensi Anda di satu tempat. Notion Web Clipper memungkinkan Anda menyimpan blog, portofolio, dan halaman riset langsung ke database kustom untuk mengatur proyek klien dengan mudah.",
+        trustBadge: "Disetujui Developer",
+        categoryName: "Peralatan Freelancer"
+      },
+      "ext-34": {
+        name: "Wappalyzer: Tech Stack Finder",
+        tagline: "Identifikasi CMS, kerangka kerja, dan teknologi web yang digunakan di situs web mana pun.",
+        description: "Wappalyzer adalah alat audit teknologi web untuk freelancer dan insinyur. Temukan kerangka kerja (framework), piksel pelacak, penyedia hosting, dan database yang berjalan di situs web kompetitor atau klien.",
+        trustBadge: "Audit Teknologi Terbaik",
+        categoryName: "Peralatan Freelancer"
+      },
+      "ext-35": {
+        name: "Hunter: Email Finder for Outreach",
+        tagline: "Temukan alamat email profesional untuk domain atau situs web apa pun secara instan.",
+        description: "Hunter memungkinkan Anda menemukan alamat email yang terkait dengan situs web apa pun dalam hitungan detik. Ideal untuk freelancer penjualan keluar dan pemasar yang mencoba terhubung dengan bisnis.",
+        trustBadge: "Pencari Kontak Terbaik",
+        categoryName: "Peralatan Freelancer"
+      },
+      "ext-36": {
+        name: "Clockify: Time Tracker & Timesheet",
+        tagline: "Lacak jam kerja di berbagai aplikasi web dan susun laporan klien yang bersih.",
+        description: "Clockify adalah ekstensi pelacakan waktu gratis. Freelancer dapat memulai pengatur waktu langsung dari Trello, Jira, Notion, dan Gmail untuk menagih klien secara akurat.",
+        trustBadge: "Pelacak Waktu Terbaik",
+        categoryName: "Peralatan Freelancer"
+      },
+      "ext-37": {
+        name: "Tango: Buat Panduan Langkah demi Langkah",
+        tagline: "Buat tangkapan layar terstruktur dan panduan petunjuk (how-to) otomatis saat Anda mengeklik.",
+        description: "Tango menangkap alur kerja web Anda secara real-time, secara otomatis menghasilkan dokumentasi langkah demi langkah yang indah dengan tangkapan layar yang diperbesar untuk panduan instruksi.",
+        trustBadge: "Disetujui Editor",
+        categoryName: "Peralatan Freelancer"
+      },
+      "ext-38": {
+        name: "Keywords Everywhere",
+        tagline: "Alat riset kata kunci yang menampilkan volume, CPC, dan tingkat persaingan langsung di Google.",
+        description: "Keywords Everywhere menampilkan data volume pencarian di Google Search, YouTube, dan Amazon. Ini menampilkan tarif biaya per klik (CPC) dan grafik tren pencarian untuk membantu blogger merencanakan artikel.",
+        trustBadge: "Riset Kata Kunci Terbaik",
+        categoryName: "SEO & Pemasaran"
+      },
+      "ext-39": {
+        name: "SimilarWeb: Website Traffic Auditor",
+        tagline: "Analisis statistik lalu lintas situs web, sumber rujukan, dan peringkat dalam 1 klik.",
+        description: "SimilarWeb menyediakan statistik lalu lintas (traffic) dan keterlibatan pengunjung untuk situs web apa pun. Periksa rasio pantulan kompetitor dan saluran lalu lintas rujukan langsung dari bilah browser.",
+        trustBadge: "Analisis Trafik Terbaik",
+        categoryName: "SEO & Pemasaran"
+      },
+      "ext-40": {
+        name: "SEOquake",
+        tagline: "Lakukan audit SEO instan, periksa otoritas domain, dan analisis kepadatan kata kunci.",
+        description: "SEOquake adalah utilitas pemeriksa SEO lengkap. Ini menampilkan metrik pencarian di halaman hasil Google, memungkinkan blogger melakukan audit konten cepat, memverifikasi densitas kata kunci, dan membandingkan backlink.",
+        trustBadge: "Audit SEO Praktis Terbaik",
+        categoryName: "SEO & Pemasaran"
+      },
+      "ext-41": {
+        name: "Ahrefs SEO Toolbar",
+        tagline: "Periksa tautan balik (backlinks), kesulitan kata kunci, dan nilai Domain Rating langsung di hasil pencarian.",
+        description: "Ahrefs SEO Toolbar menampilkan metrik Ahrefs langsung di hasil pencarian Anda. Mengevaluasi kesulitan kata kunci pencarian, lalu lintas organik, dan catatan backlink untuk membantu blogger meningkatkan otoritas web.",
+        trustBadge: "Pilihan Profesional",
+        categoryName: "SEO & Pemasaran"
+      },
+      "ext-42": {
+        name: "Detailed SEO Extension",
+        tagline: "Dapatkan wawasan SEO terperinci untuk halaman web mana pun dalam satu klik. Periksa heading dan schema.",
+        description: "Detailed SEO menganalisis hierarki heading (H1-H6), tag meta robot, struktur schema, dan tautan kanonik secara instan. Membantu blogger mengoptimalkan sinyal SEO on-page dalam hitungan detik.",
+        trustBadge: "Audit On-Page Terbaik",
+        categoryName: "SEO & Pemasaran"
       }
     };
 

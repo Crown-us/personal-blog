@@ -57,6 +57,18 @@ export default function CategoryDetail({ params }: { params: Promise<{ slug: str
       "research-learning": {
         name: "Riset & Pembelajaran",
         description: "Alat bantu AI untuk penelitian akademis, analisis jurnal, ringkasan materi, dan studi mahasiswa."
+      },
+      "content-creator": {
+        name: "Pembuat Konten",
+        description: "Alat desain AI, pembuat presentasi, dan generator media visual untuk kreator konten."
+      },
+      "freelancer-toolkit": {
+        name: "Peralatan Freelancer",
+        description: "Alat perekam layar, pengarsip web (clippers), pelacak waktu, dan utilitas penunjang pekerja mandiri."
+      },
+      "seo-marketing": {
+        name: "SEO & Pemasaran",
+        description: "Metrik kata kunci, analisis kompetitor web, dan audit SEO untuk blogger dan pemasar digital."
       }
     };
     
