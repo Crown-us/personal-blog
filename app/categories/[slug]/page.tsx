@@ -53,6 +53,10 @@ export default function CategoryDetail({ params }: { params: Promise<{ slug: str
       "news-reading": {
         name: "Berita & Bacaan",
         description: "RSS feed reader kustom, mode baca bersih bebas iklan, pengubah teks-ke-suara, dan ringkasan berita."
+      },
+      "research-learning": {
+        name: "Riset & Pembelajaran",
+        description: "Alat bantu AI untuk penelitian akademis, analisis jurnal, ringkasan materi, dan studi mahasiswa."
       }
     };
     

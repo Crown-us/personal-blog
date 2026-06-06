@@ -116,7 +116,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         tagline: "Dapatkan jawaban instan dengan kutipan sumber untuk setiap pertanyaan langsung di browser Anda.",
         description: "Perplexity AI menggantikan pencarian tradisional dengan jawaban instan, interaktif, dan dikutip sepenuhnya. Sorot teks apa saja atau ajukan pertanyaan langsung. Perplexity mencari web secara langsung, menyusun sumber daya terbaik, dan menyintesis jawaban bersih dengan kutipan sumber. Sangat berguna untuk riset.",
         trustBadge: "Terbaik Untuk Riset",
-        categoryName: "Alat AI"
+        categoryName: "Riset & Pembelajaran"
       },
       "ext-4": {
         name: "Merlin - Asisten ChatGPT di Chrome",
@@ -208,6 +208,41 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         description: "CodeGeeX adalah asisten coding AI multibahasa yang andal. Selain menulis boilerplate kode dan penjelasan, alat ini berspesialisasi dalam menerjemahkan blok kode dari satu bahasa pemrograman ke bahasa pemrograman lainnya dengan presisi tinggi (misal: Python ke Go) untuk mempercepat migrasi sistem.",
         trustBadge: "Penerjemah Kode Terbaik",
         categoryName: "Alat Developer"
+      },
+      "ext-17": {
+        name: "SciSpace Copilot",
+        tagline: "Asisten riset AI Anda. Jelaskan makalah ilmiah, telusuri pustaka akademis, dan analisis persamaan.",
+        description: "SciSpace Copilot adalah pembantu browser yang andal untuk peneliti dan mahasiswa. Alat ini menyorot teks jurnal yang rumit, merangkum artikel ilmiah, menjelaskan jargon akademis yang sulit, dan memecahkan persamaan matematika secara real-time.",
+        trustBadge: "Terbaik Untuk Jurnal",
+        categoryName: "Riset & Pembelajaran"
+      },
+      "ext-18": {
+        name: "Explainpaper",
+        tagline: "Unggah makalah penelitian yang rumit dan dapatkan penjelasan yang sederhana serta mudah dipahami.",
+        description: "Explainpaper adalah cara termudah untuk membaca jurnal akademik. Cukup sorot bagian kalimat atau persamaan yang membingungkan, dan AI Explainpaper akan menerjemahkannya ke dalam bahasa yang sederhana. Membantu mahasiswa memahami jurnal 10x lebih cepat.",
+        trustBadge: "Paling Mudah Digunakan",
+        categoryName: "Riset & Pembelajaran"
+      },
+      "ext-19": {
+        name: "Scholarcy: Perangkum Makalah Penelitian",
+        tagline: "Baca jurnal penelitian lebih cepat. Rangkum artikel ilmiah dan buat kartu flash dalam hitungan detik.",
+        description: "Scholarcy adalah perpustakaan interaktif dan alat peringkas otomatis. Alat ini membaca jurnal akademis, bab buku, dan laporan riset, kemudian mengekstrak fakta penting, gambar, dan daftar pustaka menjadi kartu flash ringkasan yang terstruktur.",
+        trustBadge: "Peringkas Terbaik",
+        categoryName: "Riset & Pembelajaran"
+      },
+      "ext-20": {
+        name: "WebChatGPT: ChatGPT dengan Akses Internet",
+        tagline: "Lengkapi prompt ChatGPT Anda dengan hasil pencarian web yang relevan untuk jawaban yang akurat.",
+        description: "WebChatGPT adalah ekstensi browser yang menambahkan hasil pencarian web real-time yang relevan ke prompt ChatGPT Anda. Dengan menyediakan akses internet terupdate, ini membantu mahasiswa mendapatkan informasi yang cited dan akurat.",
+        trustBadge: "Favorit Mahasiswa",
+        categoryName: "Riset & Pembelajaran"
+      },
+      "ext-21": {
+        name: "YouTube Summary dengan ChatGPT",
+        tagline: "Dapatkan transkrip dan ringkasan terstruktur instan untuk video YouTube menggunakan AI.",
+        description: "YouTube Summary menggunakan ChatGPT untuk menghasilkan transkrip dan ringkasan video perkuliahan, webinar, dan tutorial di YouTube. Menghemat waktu belajar mahasiswa dengan menyorot konsep inti dan penanda waktu (timestamps) secara instan.",
+        trustBadge: "Peringkas Video Terbaik",
+        categoryName: "Riset & Pembelajaran"
       }
     };
 

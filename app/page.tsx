@@ -7,7 +7,7 @@ import CompareTray from "@/components/shared/CompareTray";
 import { useCompare } from "@/hooks/useCompare";
 import { mockExtensions, mockSourceCodes, mockBlogPosts } from "@/config/mock-data";
 import { categories } from "@/config/categories";
-import { Search, Bot, Zap, Shield, Code2, PenLine, Sparkles } from "lucide-react";
+import { Search, Bot, Zap, Shield, Code2, PenLine, Sparkles, GraduationCap } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/components/LanguageProvider";
 import PageWrapper from "@/components/shared/PageWrapper";
@@ -34,6 +34,7 @@ export default function Home() {
       case "Shield": return <Shield className="h-4 w-4" />;
       case "Code2": return <Code2 className="h-4 w-4" />;
       case "PenLine": return <PenLine className="h-4 w-4" />;
+      case "GraduationCap": return <GraduationCap className="h-4 w-4" />;
       default: return <Sparkles className="h-4 w-4" />;
     }
   };
@@ -49,6 +50,7 @@ export default function Home() {
       case "Design": return "Desain";
       case "Shopping": return "Belanja";
       case "News & Reading": return "Berita & Bacaan";
+      case "Research & Learning": return "Riset & Pembelajaran";
       default: return name;
     }
   };

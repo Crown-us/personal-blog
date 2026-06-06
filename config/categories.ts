@@ -71,6 +71,15 @@ export const categories = [
     color: "#14b8a6",
     gradient: "from-teal-500 to-cyan-500",
   },
+  {
+    id: "research-learning",
+    slug: "research-learning",
+    name: "Research & Learning",
+    description: "AI tools for academic research, paper analysis, summaries, and studying",
+    icon: "GraduationCap",
+    color: "#06b6d4",
+    gradient: "from-cyan-500 to-blue-500",
+  },
 ] as const;
 
 export type Category = (typeof categories)[number];

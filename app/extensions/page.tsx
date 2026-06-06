@@ -47,6 +47,7 @@ export default function ExtensionsDirectory() {
       case "design": return "Desain";
       case "shopping": return "Belanja";
       case "news-reading": return "Berita & Bacaan";
+      case "research-learning": return "Riset & Pembelajaran";
       default: return slug;
     }
   };
