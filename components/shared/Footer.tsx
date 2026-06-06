@@ -286,18 +286,18 @@ export default function Footer() {
       </div>
 
       {/* Giant backdrop text wordmark at the very bottom (Laravel style) */}
-      {/* Light Mode backdrop: subtle black outline, thicker stroke width (1.5px) */}
+      {/* Light Mode backdrop: subtle black outline, thicker stroke width (2px), italic */}
       <div 
-        className="block dark:hidden select-none pointer-events-none text-center font-black tracking-[0.12em] uppercase text-[15vw] leading-none -mb-10 lg:-mb-14 text-transparent"
-        style={{ WebkitTextStroke: "1.5px rgba(0, 0, 0, 0.05)" }}
+        className="block dark:hidden select-none pointer-events-none text-center font-black italic tracking-[0.12em] uppercase text-[15vw] leading-none mt-6 text-transparent"
+        style={{ WebkitTextStroke: "2px rgba(0, 0, 0, 0.16)", transform: "translateY(25%)" }}
       >
         ROKETDEV
       </div>
       
-      {/* Dark Mode backdrop: subtle white outline, thicker stroke width (1.5px) */}
+      {/* Dark Mode backdrop: subtle white outline, thicker stroke width (2px), italic */}
       <div 
-        className="hidden dark:block select-none pointer-events-none text-center font-black tracking-[0.12em] uppercase text-[15vw] leading-none -mb-10 lg:-mb-14 text-transparent"
-        style={{ WebkitTextStroke: "1.5px rgba(255, 255, 255, 0.05)" }}
+        className="hidden dark:block select-none pointer-events-none text-center font-black italic tracking-[0.12em] uppercase text-[15vw] leading-none mt-6 text-transparent"
+        style={{ WebkitTextStroke: "2px rgba(255, 255, 255, 0.16)", transform: "translateY(25%)" }}
       >
         ROKETDEV
       </div>
