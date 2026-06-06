@@ -152,7 +152,7 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
           {/* Left Category Sidebar */}
-          <aside className="space-y-4">
+          <aside className="space-y-4 sticky top-20 self-start">
             <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-wider pl-1.5">
               {dict["common.browseCategories"]}
             </h2>

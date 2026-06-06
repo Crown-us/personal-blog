@@ -126,7 +126,7 @@ export default function ExtensionsDirectory() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
           {/* Side Filters - Desktop */}
-          <aside className="hidden lg:block space-y-6">
+          <aside className="hidden lg:block space-y-6 sticky top-20 self-start">
             <div className="flex items-center justify-between">
               <h2 className="font-bold text-sm tracking-wide uppercase text-foreground flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4" />
