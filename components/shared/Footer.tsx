@@ -284,6 +284,14 @@ export default function Footer() {
         </div>
 
       </div>
+
+      {/* Giant backdrop text wordmark at the very bottom (Laravel style) */}
+      <div 
+        className="select-none pointer-events-none text-center font-black tracking-[0.12em] uppercase text-[15vw] leading-none -mb-10 lg:-mb-14 text-transparent"
+        style={{ WebkitTextStroke: "1px rgba(255, 255, 255, 0.025)" }}
+      >
+        ROKETDEV
+      </div>
     </footer>
   );
 }
