@@ -22,31 +22,31 @@ export default function Footer() {
   };
 
   return (
-    <footer className="relative border-t border-neutral-900 bg-[#0B0F19] text-neutral-400 text-xs mt-16 overflow-hidden">
+    <footer className="relative border-t border-neutral-200 dark:border-neutral-900 bg-[#F8FAFC] dark:bg-[#0B0F19] text-neutral-600 dark:text-neutral-400 text-xs mt-16 overflow-hidden">
       {/* Top glowing accent line representing rocket flame gradient similar to laravel.com accent */}
       <div className="h-1 w-full bg-gradient-to-r from-red-500 via-orange-500 via-primary to-indigo-600" />
       
       {/* Ambient glow effect at the top */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-36 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none blur-3xl" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-36 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none blur-3xl opacity-30 dark:opacity-100" />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 relative z-10">
         
         {/* Main Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 pb-12 border-b border-neutral-900">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 pb-12 border-b border-neutral-200 dark:border-neutral-900">
           
           {/* Column 1: Brand Logo, Description, Newsletter (4 cols span) */}
           <div className="lg:col-span-4 space-y-6 pr-0 lg:pr-8">
             <div className="space-y-4">
-              <Link href="/" className="flex items-center gap-2.5 font-bold tracking-tight text-white text-base group">
+              <Link href="/" className="flex items-center gap-2.5 font-bold tracking-tight text-neutral-900 dark:text-white text-base group">
                 <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-tr from-red-500 to-primary text-white shadow-md shadow-primary/20 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
                   <Rocket className="h-4 w-4 fill-current" />
                 </span>
-                <span className="text-lg">
+                <span className="text-lg font-bold">
                   Roket<span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400 font-extrabold">Dev</span>
                 </span>
               </Link>
               
-              <p className="text-[11px] text-neutral-400 leading-relaxed max-w-sm">
+              <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed max-w-sm">
                 {t({
                   id: "RoketDev adalah marketplace dan direktori source code, template website, dan devtools pilihan untuk membantu pengembang, freelancer, dan agensi lokal meluncurkan projek mereka secepat roket.",
                   en: "RoketDev is a curated marketplace and directory of source code, website templates, and devtools helping developers, freelancers, and local agencies launch their projects as fast as a rocket."
@@ -56,14 +56,14 @@ export default function Footer() {
 
             {/* Newsletter Subscription Form */}
             <div className="space-y-3 pt-2">
-              <h4 className="font-bold text-[10px] text-white uppercase tracking-wider flex items-center gap-1.5">
+              <h4 className="font-bold text-[10px] text-neutral-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
                 <Mail className="h-3 w-3 text-primary" />
                 <span>{t({ id: "Berlangganan Newsletter", en: "Subscribe to Newsletter" })}</span>
               </h4>
               
               {status === "success" ? (
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] animate-fadeIn">
-                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px] animate-fadeIn">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
                   <span>
                     {t({
                       id: "Terima kasih! Anda berhasil berlangganan. 🚀",
@@ -80,7 +80,7 @@ export default function Footer() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={t({ id: "Masukkan email Anda", en: "Enter your email address" })}
                     disabled={status === "submitting"}
-                    className="bg-neutral-900/90 border border-neutral-800/80 text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-[11px] rounded-lg px-3 py-2 w-full transition-all disabled:opacity-50"
+                    className="bg-white dark:bg-neutral-900/90 border border-neutral-300 dark:border-neutral-800/80 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary text-[11px] rounded-lg px-3 py-2 w-full transition-all disabled:opacity-50"
                   />
                   <button
                     type="submit"
@@ -100,7 +100,7 @@ export default function Footer() {
                 href={siteConfig.links.twitter} 
                 target="_blank" 
                 rel="noreferrer" 
-                className="p-2 rounded-lg bg-neutral-900/60 border border-neutral-800/40 hover:border-neutral-700/50 hover:bg-neutral-800 text-neutral-400 hover:text-primary hover:scale-105 active:scale-95 transition-all flex items-center justify-center"
+                className="p-2 rounded-lg bg-white dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800/40 hover:border-neutral-300 dark:hover:border-neutral-700/50 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 dark:text-neutral-400 hover:text-primary dark:hover:text-primary hover:scale-105 active:scale-95 transition-all flex items-center justify-center shadow-xs dark:shadow-none"
                 aria-label="Twitter"
               >
                 <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
@@ -111,7 +111,7 @@ export default function Footer() {
                 href={siteConfig.links.github} 
                 target="_blank" 
                 rel="noreferrer" 
-                className="p-2 rounded-lg bg-neutral-900/60 border border-neutral-800/40 hover:border-neutral-700/50 hover:bg-neutral-800 text-neutral-400 hover:text-white hover:scale-105 active:scale-95 transition-all flex items-center justify-center"
+                className="p-2 rounded-lg bg-white dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800/40 hover:border-neutral-300 dark:hover:border-neutral-700/50 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 dark:text-neutral-400 hover:text-white dark:hover:text-white hover:scale-105 active:scale-95 transition-all flex items-center justify-center shadow-xs dark:shadow-none"
                 aria-label="GitHub"
               >
                 <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
@@ -120,7 +120,7 @@ export default function Footer() {
               </a>
               <a 
                 href="#" 
-                className="p-2 rounded-lg bg-neutral-900/60 border border-neutral-800/40 hover:border-neutral-700/50 hover:bg-neutral-800 text-neutral-400 hover:text-indigo-400 hover:scale-105 active:scale-95 transition-all flex items-center justify-center"
+                className="p-2 rounded-lg bg-white dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800/40 hover:border-neutral-300 dark:hover:border-neutral-700/50 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 dark:text-neutral-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:scale-105 active:scale-95 transition-all flex items-center justify-center shadow-xs dark:shadow-none"
                 aria-label="Discord"
               >
                 <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
@@ -129,7 +129,7 @@ export default function Footer() {
               </a>
               <a 
                 href="#" 
-                className="p-2 rounded-lg bg-neutral-900/60 border border-neutral-800/40 hover:border-neutral-700/50 hover:bg-neutral-800 text-neutral-400 hover:text-red-500 hover:scale-105 active:scale-95 transition-all flex items-center justify-center"
+                className="p-2 rounded-lg bg-white dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800/40 hover:border-neutral-300 dark:hover:border-neutral-700/50 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 dark:text-neutral-400 hover:text-red-500 dark:hover:text-red-500 hover:scale-105 active:scale-95 transition-all flex items-center justify-center shadow-xs dark:shadow-none"
                 aria-label="YouTube"
               >
                 <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
@@ -144,27 +144,27 @@ export default function Footer() {
             
             {/* Column 2: Products */}
             <div className="space-y-4">
-              <h3 className="font-bold text-[10px] text-white uppercase tracking-widest">
+              <h3 className="font-bold text-[10px] text-neutral-900 dark:text-white uppercase tracking-widest">
                 {t({ id: "Produk & Direktori", en: "Products & Directory" })}
               </h3>
               <ul className="space-y-2.5">
                 <li>
-                  <Link href="/extensions" className="hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-400">
+                  <Link href="/extensions" className="hover:text-neutral-900 dark:hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-500 dark:text-neutral-400">
                     {t({ id: "Cari DevTools", en: "Browse DevTools" })}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/source-code" className="hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-400">
+                  <Link href="/source-code" className="hover:text-neutral-900 dark:hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-500 dark:text-neutral-400">
                     {t({ id: "Source Code Premium", en: "Premium Source Code" })}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/bundles" className="hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-400">
+                  <Link href="/bundles" className="hover:text-neutral-900 dark:hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-500 dark:text-neutral-400">
                     {t({ id: "Paket Hemat", en: "Curated Bundles" })}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/showcase" className="hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-400">
+                  <Link href="/showcase" className="hover:text-neutral-900 dark:hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-500 dark:text-neutral-400">
                     {t({ id: "Showcase Demo", en: "Live Showcases" })}
                   </Link>
                 </li>
@@ -173,27 +173,27 @@ export default function Footer() {
 
             {/* Column 3: Resources */}
             <div className="space-y-4">
-              <h3 className="font-bold text-[10px] text-white uppercase tracking-widest">
+              <h3 className="font-bold text-[10px] text-neutral-900 dark:text-white uppercase tracking-widest">
                 {t({ id: "Sumber Daya", en: "Resources" })}
               </h3>
               <ul className="space-y-2.5">
                 <li>
-                  <Link href="/blog" className="hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-400">
+                  <Link href="/blog" className="hover:text-neutral-900 dark:hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-500 dark:text-neutral-400">
                     {t({ id: "Tutorial & Blog", en: "Tutorials & Blog" })}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/submit" className="hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-400">
+                  <Link href="/submit" className="hover:text-neutral-900 dark:hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-500 dark:text-neutral-400">
                     {t({ id: "Kirim Produk", en: "Submit Product" })}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/dashboard" className="hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-400">
+                  <Link href="/dashboard" className="hover:text-neutral-900 dark:hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-500 dark:text-neutral-400">
                     {t({ id: "Konsol Penerbit", en: "Publisher Console" })}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/compare" className="hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-400">
+                  <Link href="/compare" className="hover:text-neutral-900 dark:hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-500 dark:text-neutral-400">
                     {t({ id: "Bandingkan Alat", en: "Compare Tools" })}
                   </Link>
                 </li>
@@ -202,27 +202,27 @@ export default function Footer() {
 
             {/* Column 4: Ecosystem */}
             <div className="space-y-4">
-              <h3 className="font-bold text-[10px] text-white uppercase tracking-widest">
+              <h3 className="font-bold text-[10px] text-neutral-900 dark:text-white uppercase tracking-widest">
                 {t({ id: "Ekosistem", en: "Ecosystem" })}
               </h3>
               <ul className="space-y-2.5">
                 <li>
-                  <Link href="/categories" className="hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-400">
+                  <Link href="/categories" className="hover:text-neutral-900 dark:hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-500 dark:text-neutral-400">
                     {t({ id: "Kategori Pilihan", en: "Featured Categories" })}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/trending" className="hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-400">
+                  <Link href="/trending" className="hover:text-neutral-900 dark:hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-500 dark:text-neutral-400">
                     {t({ id: "Produk Tren", en: "Trending Products" })}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/collections" className="hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-400">
+                  <Link href="/collections" className="hover:text-neutral-900 dark:hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-500 dark:text-neutral-400">
                     {t({ id: "Koleksi Pilihan", en: "Featured Collections" })}
                   </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-400">
+                  <a href="#" className="hover:text-neutral-900 dark:hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-500 dark:text-neutral-400">
                     {t({ id: "Status Layanan", en: "Service Status" })}
                   </a>
                 </li>
@@ -231,27 +231,27 @@ export default function Footer() {
 
             {/* Column 5: Legal */}
             <div className="space-y-4">
-              <h3 className="font-bold text-[10px] text-white uppercase tracking-widest">
+              <h3 className="font-bold text-[10px] text-neutral-900 dark:text-white uppercase tracking-widest">
                 {t({ id: "Legalitas", en: "Rules & Legal" })}
               </h3>
               <ul className="space-y-2.5">
                 <li>
-                  <Link href="/privacy" className="hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-400">
+                  <Link href="/privacy" className="hover:text-neutral-900 dark:hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-500 dark:text-neutral-400">
                     {t({ id: "Kebijakan Privasi", en: "Privacy Policy" })}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/terms" className="hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-400">
+                  <Link href="/terms" className="hover:text-neutral-900 dark:hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-500 dark:text-neutral-400">
                     {t({ id: "Syarat Ketentuan", en: "Terms of Service" })}
                   </Link>
                 </li>
                 <li>
-                  <Link href="/cookies" className="hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-400">
+                  <Link href="/cookies" className="hover:text-neutral-900 dark:hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-500 dark:text-neutral-400">
                     {t({ id: "Kebijakan Cookie", en: "Cookie Policy" })}
                   </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-400">
+                  <a href="#" className="hover:text-neutral-900 dark:hover:text-white hover:translate-x-0.5 transition-all duration-200 block text-neutral-500 dark:text-neutral-400">
                     {t({ id: "Hubungi Kami", en: "Contact Support" })}
                   </a>
                 </li>
@@ -268,7 +268,7 @@ export default function Footer() {
             <span>
               © {new Date().getFullYear()} RoketDev. {t({ id: "Seluruh hak cipta dilindungi.", en: "All rights reserved." })}
             </span>
-            <span className="hidden md:inline text-neutral-800">|</span>
+            <span className="hidden md:inline text-neutral-200 dark:text-neutral-800">|</span>
             <span>
               {t({
                 id: "RoketDev adalah platform direktori independen untuk pengembang software Indonesia.",
@@ -276,7 +276,7 @@ export default function Footer() {
               })}
             </span>
           </div>
-          <span className="flex items-center gap-1.5 shrink-0 bg-neutral-900/40 px-3 py-1.5 rounded-full border border-neutral-800/30">
+          <span className="flex items-center gap-1.5 shrink-0 bg-neutral-200/50 dark:bg-neutral-900/40 px-3 py-1.5 rounded-full border border-neutral-200 dark:border-neutral-800/30">
             {t({ id: "Dibangun dengan", en: "Built with" })}{" "}
             <span className="text-red-500 animate-pulse">❤️</span>{" "}
             {t({ id: "untuk pengembang lokal", en: "for local developers" })}
@@ -286,9 +286,18 @@ export default function Footer() {
       </div>
 
       {/* Giant backdrop text wordmark at the very bottom (Laravel style) */}
+      {/* Light Mode backdrop: subtle black outline, thicker stroke width (1.5px) */}
       <div 
-        className="select-none pointer-events-none text-center font-black tracking-[0.12em] uppercase text-[15vw] leading-none -mb-10 lg:-mb-14 text-transparent"
-        style={{ WebkitTextStroke: "1px rgba(255, 255, 255, 0.025)" }}
+        className="block dark:hidden select-none pointer-events-none text-center font-black tracking-[0.12em] uppercase text-[15vw] leading-none -mb-10 lg:-mb-14 text-transparent"
+        style={{ WebkitTextStroke: "1.5px rgba(0, 0, 0, 0.05)" }}
+      >
+        ROKETDEV
+      </div>
+      
+      {/* Dark Mode backdrop: subtle white outline, thicker stroke width (1.5px) */}
+      <div 
+        className="hidden dark:block select-none pointer-events-none text-center font-black tracking-[0.12em] uppercase text-[15vw] leading-none -mb-10 lg:-mb-14 text-transparent"
+        style={{ WebkitTextStroke: "1.5px rgba(255, 255, 255, 0.05)" }}
       >
         ROKETDEV
       </div>
