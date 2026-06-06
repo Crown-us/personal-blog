@@ -54,10 +54,10 @@ export default function Navbar() {
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-1.5 font-bold text-sm tracking-tight text-foreground">
             <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary text-primary-foreground text-xs font-bold">
-              ⚡
+              🚀
             </span>
             <span>
-              Extension<span className="text-primary font-bold">Hub</span>
+              Roket<span className="text-primary font-bold">Dev</span>
             </span>
           </Link>
 

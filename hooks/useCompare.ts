@@ -6,7 +6,7 @@ export function useCompare() {
   const [compareIds, setCompareIds] = useState<string[]>([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem("extensionhub_compare_ids");
+    const saved = localStorage.getItem("roketdev_compare_ids");
     if (saved) {
       try {
         setCompareIds(JSON.parse(saved));
@@ -28,12 +28,12 @@ export function useCompare() {
       next = [...compareIds, id];
     }
     setCompareIds(next);
-    localStorage.setItem("extensionhub_compare_ids", JSON.stringify(next));
+    localStorage.setItem("roketdev_compare_ids", JSON.stringify(next));
   };
 
   const clearCompare = () => {
     setCompareIds([]);
-    localStorage.removeItem("extensionhub_compare_ids");
+    localStorage.removeItem("roketdev_compare_ids");
   };
 
   return {

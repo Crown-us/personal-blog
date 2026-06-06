@@ -46,7 +46,7 @@ export default function BlogIndex() {
         <div className="border-b border-border pb-6 mb-10 text-center sm:text-left">
           <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl flex items-center justify-center sm:justify-start gap-2">
             <BookOpen className="h-7 w-7 text-primary" />
-            {t({ id: "Blog ExtensionHub", en: "ExtensionHub Blog" })}
+            {t({ id: "Blog RoketDev", en: "RoketDev Blog" })}
           </h1>
           <p className="text-sm text-muted-foreground mt-2">
             {t({

@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ExtensionHub - Curated DevTools & Source Codes Marketplace",
-  description: "Discover curated developer tools, browser extensions, implementation playbooks, and production-ready source codes.",
+  title: "RoketDev - Curated DevTools & Source Codes Marketplace",
+  description: "Temukan source code premium, template website, dan devtools pilihan untuk meluncurkan projek Anda secepat roket.",
 };
 
 export default function RootLayout({

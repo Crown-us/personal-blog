@@ -42,16 +42,16 @@ export default function Footer() {
           <div className="space-y-2.5">
             <Link href="/" className="flex items-center gap-1.5 font-bold tracking-tight text-foreground">
               <span className="flex h-5 w-5 items-center justify-center rounded bg-primary text-primary-foreground text-[10px]">
-                ⚡
+                🚀
               </span>
               <span>
-                Extension<span className="text-primary">Hub</span>
+                Roket<span className="text-primary">Dev</span>
               </span>
             </Link>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
               {t({
-                id: "Temukan dan bandingkan ekstensi untuk mengonfigurasi tata letak web Anda. Indeks katalog independen.",
-                en: "Discover and compare extensions to configure your web layout. Independent catalog index."
+                id: "Temukan dan unduh source code, template website, dan devtools terbaik untuk meluncurkan proyek Anda secepat roket.",
+                en: "Discover and download the best source code, website templates, and devtools to launch your project as fast as a rocket."
               })}
             </p>
           </div>
@@ -107,7 +107,7 @@ export default function Footer() {
 
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-muted-foreground text-[11px]">
           <span>
-            © {new Date().getFullYear()} ExtensionHub. {t({ id: "Hak cipta dilindungi undang-undang.", en: "All rights reserved." })}
+            © {new Date().getFullYear()} RoketDev. {t({ id: "Hak cipta dilindungi undang-undang.", en: "All rights reserved." })}
           </span>
           <div className="flex gap-4">
             <a href={siteConfig.links.twitter} target="_blank" rel="noreferrer" className="hover:underline">

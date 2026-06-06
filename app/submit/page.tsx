@@ -79,8 +79,8 @@ export default function SubmitDevTool() {
           </h1>
           <p className="text-sm text-muted-foreground mt-2">
             {t({
-              id: "Daftarkan alat developer atau plugin Anda di ExtensionHub. Jangkau 50.000+ pencari tertarget.",
-              en: "List your developer tool or plugin on ExtensionHub. Reach 50,000+ targeted discoverers."
+              id: "Daftarkan alat developer atau plugin Anda di RoketDev. Jangkau 50.000+ pencari tertarget.",
+              en: "List your developer tool or plugin on RoketDev. Reach 50,000+ targeted discoverers."
             })}
           </p>
         </div>

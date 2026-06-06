@@ -26,7 +26,7 @@ export const mockExtensions: ExtensionWithDetails[] = [
     logoUrl: "🤖",
     websiteUrl: "https://chatgptsidebar.io",
     chromeStoreUrl: "https://chromewebstore.google.com",
-    affiliateUrl: "https://chatgptsidebar.io/ref=extensionhub",
+    affiliateUrl: "https://chatgptsidebar.io/ref=roketdev",
     status: "featured",
     isFeatured: true,
     isSponsored: false,

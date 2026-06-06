@@ -140,7 +140,7 @@ function ComparisonContent() {
                 </div>
                 
                 <div className="text-xs text-muted-foreground/60 border-t border-border/40 pt-4">
-                  ExtensionHub Metrics
+                  RoketDev Metrics
                 </div>
               </div>
 

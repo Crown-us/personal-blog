@@ -1,20 +1,20 @@
 export const siteConfig = {
-  name: "ExtensionHub",
+  name: "RoketDev",
   description:
-    "Discover, compare, and install the best Chrome extensions. Trusted by 50,000+ users worldwide.",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://extensionhub.io",
+    "Temukan dan unduh source code, template website, dan devtools terbaik untuk meluncurkan proyek Anda secepat roket.",
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://roketdev.id",
   ogImage: "/og/default.png",
   links: {
-    twitter: "https://twitter.com/extensionhub",
-    github: "https://github.com/extensionhub",
+    twitter: "https://twitter.com/roketdev",
+    github: "https://github.com/roketdev",
   },
-  creator: "ExtensionHub",
+  creator: "RoketDev",
   keywords: [
+    "source code",
+    "templates website",
     "chrome extensions",
-    "browser extensions",
-    "productivity tools",
-    "chrome web store",
-    "extension reviews",
+    "devtools",
+    "marketplace developer",
   ],
 };
 

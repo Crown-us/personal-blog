@@ -290,7 +290,7 @@ export default function BundlesPage() {
                     </div>
                     <div className="flex justify-between items-center py-2">
                       <span className="text-muted-foreground font-medium">{t({ id: "Atas Nama:", en: "Account Name:" })}</span>
-                      <span className="font-extrabold text-foreground">ExtensionHub Marketplace</span>
+                      <span className="font-extrabold text-foreground">RoketDev Marketplace</span>
                     </div>
                   </div>
                 )}
