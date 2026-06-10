@@ -15,7 +15,7 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const supabase = createSupabaseBrowserClient();
 
-  const redirectTo = searchParams.get("redirectTo") || "/dashboard";
+  const redirectTo = (searchParams.get("redirectTo") || "/dashboard").trim();
 
   // Form states
   const [email, setEmail] = useState("");

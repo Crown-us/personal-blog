@@ -15,7 +15,7 @@ export default function RegisterPage() {
   const searchParams = useSearchParams();
   const supabase = createSupabaseBrowserClient();
 
-  const redirectTo = searchParams.get("redirectTo") || "/dashboard";
+  const redirectTo = (searchParams.get("redirectTo") || "/dashboard").trim();
 
   // Form states
   const [fullName, setFullName] = useState("");
