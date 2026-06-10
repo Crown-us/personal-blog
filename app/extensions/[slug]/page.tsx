@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useState, useMemo } from "react";
+import React, { use, useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import ExtensionCard from "@/components/shared/ExtensionCard";
 import CompareTray from "@/components/shared/CompareTray";
@@ -17,11 +17,36 @@ export default function ExtensionDetail({ params }: { params: Promise<{ slug: st
   const { compareIds, toggleCompare, clearCompare } = useCompare();
   const { language, t, dict, tExtension, tSourceCode, tBlog } = useLanguage();
 
+  const [dbExtension, setDbExtension] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/extensions")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          const found = data.extensions.find((ext: any) => ext.slug === slug);
+          if (found) {
+            setDbExtension(found);
+          }
+        }
+      })
+      .catch((err) => console.error("Failed to load extension detail:", err))
+      .finally(() => setIsLoading(false));
+  }, [slug]);
+
   // Find extension
   const extension = useMemo(() => {
+    if (dbExtension) {
+      return {
+        ...dbExtension,
+        categoryName: dbExtension.categoryName || "General",
+        screenshots: dbExtension.screenshots || [],
+      };
+    }
     const orig = mockExtensions.find((ext) => ext.slug === slug);
-    return tExtension(orig);
-  }, [slug, tExtension]);
+    return orig ? tExtension(orig) : null;
+  }, [dbExtension, slug, tExtension]);
 
   // Review states
   const reviewsList = useMemo(() => {

@@ -11,6 +11,26 @@ import { motion } from "framer-motion";
 export default function SourceCodeMarketplace() {
   const { language, t, dict, tSourceCode } = useLanguage();
 
+  const [sourceCodesList, setSourceCodesList] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  React.useEffect(() => {
+    fetch("/api/source-code")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.sourceCodes.length > 0) {
+          setSourceCodesList(data.sourceCodes);
+        } else {
+          setSourceCodesList(mockSourceCodes);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load source codes:", err);
+        setSourceCodesList(mockSourceCodes);
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
+
   // Filters states
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTech, setSelectedTech] = useState("all");
@@ -23,7 +43,7 @@ export default function SourceCodeMarketplace() {
   };
 
   const filteredProducts = useMemo(() => {
-    return mockSourceCodes
+    return sourceCodesList
       .map(tSourceCode)
       .filter((code) => {
         const matchesQuery = 
@@ -41,7 +61,7 @@ export default function SourceCodeMarketplace() {
 
         return matchesQuery && matchesTech && matchesCategory;
       });
-  }, [searchQuery, selectedTech, selectedCategory, tSourceCode]);
+  }, [sourceCodesList, searchQuery, selectedTech, selectedCategory, tSourceCode]);
 
   const categoriesList = [
     { value: "all", label: t({ id: "Semua Tipe", en: "All Types" }) },

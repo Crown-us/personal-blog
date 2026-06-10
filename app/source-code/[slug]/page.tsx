@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useMemo, useState } from "react";
+import React, { use, useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { mockSourceCodes, mockBlogPosts } from "@/config/mock-data";
 import { ChevronLeft, ExternalLink, CreditCard, BookOpen, Layers } from "lucide-react";
@@ -13,10 +13,35 @@ export default function SourceCodeDetail({ params }: { params: Promise<{ slug: s
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
   const { language, t, dict, tSourceCode, tBlog } = useLanguage();
 
+  const [dbProduct, setDbProduct] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/source-code")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          const found = data.sourceCodes.find((item: any) => item.slug === slug);
+          if (found) {
+            setDbProduct(found);
+          }
+        }
+      })
+      .catch((err) => console.error("Failed to load source code detail:", err))
+      .finally(() => setIsLoading(false));
+  }, [slug]);
+
   const product = useMemo(() => {
+    if (dbProduct) {
+      return {
+        ...dbProduct,
+        techStack: dbProduct.techStack || [],
+        screenshots: dbProduct.screenshots || [],
+      };
+    }
     const orig = mockSourceCodes.find((item) => item.slug === slug);
-    return tSourceCode(orig);
-  }, [slug, tSourceCode]);
+    return orig ? tSourceCode(orig) : null;
+  }, [dbProduct, slug, tSourceCode]);
 
   // Conversion: Find related tutorials
   const relatedTutorials = useMemo(() => {

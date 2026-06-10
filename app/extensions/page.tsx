@@ -14,6 +14,26 @@ export default function ExtensionsDirectory() {
   const { compareIds, toggleCompare, clearCompare } = useCompare();
   const { language, t, dict, tExtension } = useLanguage();
 
+  const [extensionsList, setExtensionsList] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  React.useEffect(() => {
+    fetch("/api/extensions")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.extensions.length > 0) {
+          setExtensionsList(data.extensions);
+        } else {
+          setExtensionsList(mockExtensions);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load extensions list:", err);
+        setExtensionsList(mockExtensions);
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
+
   // Filter & Sort States
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -57,7 +77,7 @@ export default function ExtensionsDirectory() {
 
   // Perform client side filter & sort
   const filteredExtensions = useMemo(() => {
-    return mockExtensions
+    return extensionsList
       .map(tExtension)
       .filter((ext) => {
         // Query search

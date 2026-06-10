@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import ExtensionCard from "@/components/shared/ExtensionCard";
 import CompareTray from "@/components/shared/CompareTray";
@@ -61,10 +61,71 @@ export default function Home() {
     }
   };
 
-  const featuredExtensions = mockExtensions.filter((e) => e.isFeatured).map(tExtension);
-  const popularExtensions = mockExtensions.filter((e) => !e.isFeatured).map(tExtension);
-  const translatedSourceCodes = mockSourceCodes.slice(0, 3).map(tSourceCode);
-  const translatedBlogPosts = mockBlogPosts.slice(0, 3).map(tBlog);
+  const [extensionsList, setExtensionsList] = useState<typeof mockExtensions>([]);
+  const [sourceCodesList, setSourceCodesList] = useState<typeof mockSourceCodes>([]);
+  const [blogPostsList, setBlogPostsList] = useState<typeof mockBlogPosts>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  React.useEffect(() => {
+    const fetchHomeData = async () => {
+      try {
+        const [extRes, scRes, blogRes] = await Promise.all([
+          fetch("/api/extensions"),
+          fetch("/api/source-code"),
+          fetch("/api/blog")
+        ]);
+
+        const [extData, scData, blogData] = await Promise.all([
+          extRes.json(),
+          scRes.json(),
+          blogRes.json()
+        ]);
+
+        if (extData.success && extData.extensions.length > 0) {
+          setExtensionsList(extData.extensions);
+        } else {
+          setExtensionsList(mockExtensions);
+        }
+
+        if (scData.success && scData.sourceCodes.length > 0) {
+          setSourceCodesList(scData.sourceCodes);
+        } else {
+          setSourceCodesList(mockSourceCodes);
+        }
+
+        if (blogData.success && blogData.posts.length > 0) {
+          setBlogPostsList(blogData.posts);
+        } else {
+          setBlogPostsList(mockBlogPosts);
+        }
+      } catch (err) {
+        console.error("Failed to load homepage data from DB:", err);
+        setExtensionsList(mockExtensions);
+        setSourceCodesList(mockSourceCodes);
+        setBlogPostsList(mockBlogPosts);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchHomeData();
+  }, []);
+
+  const featuredExtensions = useMemo(() => {
+    return extensionsList.filter((e) => e.isFeatured).map(tExtension);
+  }, [extensionsList, tExtension]);
+
+  const popularExtensions = useMemo(() => {
+    return extensionsList.filter((e) => !e.isFeatured).map(tExtension);
+  }, [extensionsList, tExtension]);
+
+  const translatedSourceCodes = useMemo(() => {
+    return sourceCodesList.slice(0, 3).map(tSourceCode);
+  }, [sourceCodesList, tSourceCode]);
+
+  const translatedBlogPosts = useMemo(() => {
+    return blogPostsList.slice(0, 3).map(tBlog);
+  }, [blogPostsList, tBlog]);
 
   const trendingTerms = language === "id"
     ? ["Pemblokir iklan", "ChatGPT", "Asisten menulis", "Privasi"]
