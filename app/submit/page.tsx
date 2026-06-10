@@ -12,6 +12,7 @@ export default function SubmitDevTool() {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Form states
   const [name, setName] = useState("");
@@ -56,15 +57,43 @@ export default function SubmitDevTool() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMessage("");
     
-    // Mock API delay
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const response = await fetch("/api/extensions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          tagline,
+          description,
+          chromeStoreUrl,
+          websiteUrl,
+          category,
+          pricingType,
+          price: pricingType === "paid" ? parseFloat(price) : 0,
+          tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+          permissions: permissions.split(",").map((p) => p.trim()).filter(Boolean),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || t({ id: "Gagal mengirimkan devtool.", en: "Failed to submit devtool." }));
+      }
+
       setIsSuccess(true);
-    }, 1500);
+    } catch (err: any) {
+      setErrorMessage(err.message || t({ id: "Terjadi kesalahan.", en: "An error occurred." }));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -145,6 +174,12 @@ export default function SubmitDevTool() {
           /* Form Stepper panels */
           <div className="rounded-2xl border border-border bg-card p-6 shadow-xl">
             <form onSubmit={step === 3 ? handleSubmit : handleNextStep} className="space-y-6">
+              {errorMessage && (
+                <div className="p-3 border border-rose-500/20 bg-rose-500/5 text-rose-500 rounded-xl text-xs font-semibold flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
               
               {/* STEP 1: Basic Info */}
               {step === 1 && (
