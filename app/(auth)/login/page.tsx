@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, Lock, AlertCircle, ArrowRight, Sparkles } from "lucide-react";
@@ -9,7 +9,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/components/LanguageProvider";
 import PageWrapper from "@/components/shared/PageWrapper";
 
-export default function LoginPage() {
+function LoginContent() {
   const { t, language } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -119,6 +119,7 @@ export default function LoginPage() {
             {t({ id: "Lanjutkan dengan Google", en: "Continue with Google" })}
           </button>
 
+
           {/* Separator */}
           <div className="flex items-center gap-3 text-xs text-muted-foreground/60 font-semibold my-2">
             <div className="flex-1 border-t border-border/60" />
@@ -191,5 +192,13 @@ export default function LoginPage() {
         </motion.div>
       </main>
     </PageWrapper>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background text-muted-foreground text-xs font-semibold">Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
