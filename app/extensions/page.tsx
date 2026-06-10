@@ -89,7 +89,7 @@ export default function ExtensionsDirectory() {
         // Category filter
         const matchesCategory = 
           selectedCategory === "all" || 
-          ext.categoryId === selectedCategory;
+          ext.categorySlug === selectedCategory;
 
         // Pricing filter
         const matchesPricing = 
@@ -351,8 +351,8 @@ export default function ExtensionsDirectory() {
             {/* Info total results count */}
             <div className="text-center text-xs text-muted-foreground border-t border-border/60 pt-6">
               {t({
-                id: `Menampilkan ${filteredExtensions.length} dari ${mockExtensions.length} devtools.`,
-                en: `Showing ${filteredExtensions.length} of ${mockExtensions.length} devtools.`
+                id: `Menampilkan ${filteredExtensions.length} dari ${extensionsList.length} devtools.`,
+                en: `Showing ${filteredExtensions.length} of ${extensionsList.length} devtools.`
               })}
             </div>
           </div>

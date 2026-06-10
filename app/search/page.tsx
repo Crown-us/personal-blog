@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, Suspense } from "react";
+import React, { useMemo, useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import ExtensionCard from "@/components/shared/ExtensionCard";
@@ -21,25 +21,52 @@ function SearchResultsContent() {
   const q = searchParams.get("q") || "";
   const [queryInput, setQueryInput] = useState(q);
 
+  const [extensionsList, setExtensionsList] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!q.trim()) {
+      setExtensionsList([]);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    fetch(`/api/extensions?q=${encodeURIComponent(q)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.extensions.length > 0) {
+          setExtensionsList(data.extensions);
+        } else {
+          // fallback to mockExtensions filtered client-side
+          setExtensionsList(
+            mockExtensions.filter((ext) => {
+              return (
+                ext.name.toLowerCase().includes(q.toLowerCase()) ||
+                (ext.tagline && ext.tagline.toLowerCase().includes(q.toLowerCase())) ||
+                ext.description.toLowerCase().includes(q.toLowerCase()) ||
+                ext.categoryName?.toLowerCase().includes(q.toLowerCase()) ||
+                ext.tags?.some((tTag: string) => tTag.toLowerCase().includes(q.toLowerCase()))
+              );
+            })
+          );
+        }
+      })
+      .catch((err) => {
+        console.error("Search API fetch failed:", err);
+        setExtensionsList([]);
+      })
+      .finally(() => setIsLoading(false));
+  }, [q]);
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     router.push(`/search?q=${encodeURIComponent(queryInput.trim())}`);
   };
 
   const results = useMemo(() => {
-    if (!q.trim()) return [];
-    return mockExtensions
-      .map(tExtension)
-      .filter((ext) => {
-        return (
-          ext.name.toLowerCase().includes(q.toLowerCase()) ||
-          (ext.tagline && ext.tagline.toLowerCase().includes(q.toLowerCase())) ||
-          ext.description.toLowerCase().includes(q.toLowerCase()) ||
-          ext.categoryName?.toLowerCase().includes(q.toLowerCase()) ||
-          ext.tags?.some((tTag: string) => tTag.toLowerCase().includes(q.toLowerCase()))
-        );
-      });
-  }, [q, tExtension]);
+    return extensionsList.map(tExtension);
+  }, [extensionsList, tExtension]);
 
   return (
     <>

@@ -6,7 +6,7 @@ import ExtensionCard from "@/components/shared/ExtensionCard";
 import CompareTray from "@/components/shared/CompareTray";
 import { useCompare } from "@/hooks/useCompare";
 import { mockExtensions, mockReviews, mockBlogPosts, mockSourceCodes } from "@/config/mock-data";
-import { Star, Download, Globe, Shield, ExternalLink, Calendar, MessageSquare, AlertTriangle, BookOpen, Layers, Check, X as XIcon } from "lucide-react";
+import { Star, Download, Globe, Shield, ExternalLink, Calendar, MessageSquare, AlertTriangle, BookOpen, Layers, Check, X as XIcon, Bookmark } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
 import { useLanguage } from "@/components/LanguageProvider";
 import PageWrapper from "@/components/shared/PageWrapper";
@@ -47,6 +47,42 @@ export default function ExtensionDetail({ params }: { params: Promise<{ slug: st
     const orig = mockExtensions.find((ext) => ext.slug === slug);
     return orig ? tExtension(orig) : null;
   }, [dbExtension, slug, tExtension]);
+
+  const [isBookmarked, setIsBookmarked] = useState(false);
+
+  useEffect(() => {
+    if (extension) {
+      try {
+        const stored = localStorage.getItem("roketdev_bookmarks");
+        if (stored) {
+          const bookmarks = JSON.parse(stored);
+          setIsBookmarked(bookmarks.includes(extension.slug) || bookmarks.includes(extension.id));
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, [extension]);
+
+  const toggleBookmark = () => {
+    if (!extension) return;
+    try {
+      const stored = localStorage.getItem("roketdev_bookmarks");
+      let bookmarks = stored ? JSON.parse(stored) : [];
+      const isSaved = bookmarks.includes(extension.slug);
+      
+      if (isSaved) {
+        bookmarks = bookmarks.filter((s: string) => s !== extension.slug);
+        setIsBookmarked(false);
+      } else {
+        bookmarks.push(extension.slug);
+        setIsBookmarked(true);
+      }
+      localStorage.setItem("roketdev_bookmarks", JSON.stringify(bookmarks));
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   // Review states
   const reviewsList = useMemo(() => {
@@ -478,12 +514,26 @@ export default function ExtensionDetail({ params }: { params: Promise<{ slug: st
                 {compareIds.includes(extension.id) ? t({ id: "★ Membandingkan", en: "★ Comparing" }) : t({ id: "Bandingkan", en: "Compare" })}
               </button>
 
+              {/* Bookmark Button */}
+              <button
+                onClick={toggleBookmark}
+                className={`p-2 rounded-xl border transition-all ${
+                  isBookmarked
+                    ? "border-amber-400 bg-amber-400/10 text-amber-500"
+                    : "border-border hover:bg-secondary text-muted-foreground hover:text-foreground"
+                }`}
+                title={isBookmarked ? t({ id: "Hapus Bookmark", en: "Remove Bookmark" }) : t({ id: "Tambah Bookmark", en: "Bookmark Tool" })}
+              >
+                <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-amber-400 text-amber-400" : ""}`} />
+              </button>
+
               {extension.websiteUrl && (
                 <a
                   href={extension.websiteUrl}
                   target="_blank"
                   rel="noreferrer"
                   className="p-2 rounded-xl border border-border hover:bg-secondary text-muted-foreground hover:text-foreground"
+                  title={t({ id: "Kunjungi Situs", en: "Visit Website" })}
                 >
                   <Globe className="h-4 w-4" />
                 </a>

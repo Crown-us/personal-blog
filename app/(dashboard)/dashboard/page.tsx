@@ -1,98 +1,123 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
-  BarChart3, 
-  Download, 
-  MousePointerClick, 
-  Star, 
   PlusCircle, 
   CheckCircle, 
   Clock, 
   Settings, 
   LogOut, 
   Trash2,
-  Filter,
-  BookOpen,
-  Calendar
+  Bookmark
 } from "lucide-react";
-import { mockExtensions, mockReviews } from "@/config/mock-data";
-import { formatDate, formatNumber } from "@/lib/utils";
 import Link from "next/link";
 import { useLanguage } from "@/components/LanguageProvider";
 import PageWrapper from "@/components/shared/PageWrapper";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function PublisherDashboard() {
   const { t, language } = useLanguage();
-  const [activeTab, setActiveTab] = useState("overview");
-  const [tutorials, setTutorials] = useState<any[]>([]);
-  const [loadingTutorials, setLoadingTutorials] = useState(false);
+  const supabase = createSupabaseBrowserClient();
 
-  // Fetch tutorials when tab is selected
-  React.useEffect(() => {
-    if (activeTab === "blog") {
-      setLoadingTutorials(true);
-      fetch("/api/blog")
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.success) {
-            setTutorials(data.posts);
-          }
-        })
-        .catch((err) => console.error("Error fetching tutorials:", err))
-        .finally(() => setLoadingTutorials(false));
+  const [activeTab, setActiveTab] = useState("bookmarks");
+  const [userRole, setUserRole] = useState("user");
+  const [profile, setProfile] = useState<any>(null);
+  const [dbExtensions, setDbExtensions] = useState<any[]>([]);
+  const [bookmarkedExtensions, setBookmarkedExtensions] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // 1. Fetch dashboard data
+    fetch("/api/dashboard")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setUserRole(data.role);
+          setDbExtensions(data.extensions);
+          setProfile(data.user);
+          setActiveTab("bookmarks");
+        }
+      })
+      .catch((err) => console.error("Failed to load dashboard data:", err))
+      .finally(() => setIsLoading(false));
+
+    // 2. Load bookmarks from localStorage
+    try {
+      const stored = localStorage.getItem("roketdev_bookmarks");
+      if (stored) {
+        const bookmarkSlugs = JSON.parse(stored);
+        if (bookmarkSlugs.length > 0) {
+          fetch("/api/extensions?status=all")
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.success) {
+                const matched = data.extensions.filter((ext: any) => 
+                  bookmarkSlugs.includes(ext.slug) || bookmarkSlugs.includes(ext.id)
+                );
+                setBookmarkedExtensions(matched);
+              }
+            });
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to load bookmarks:", e);
     }
-  }, [activeTab]);
+  }, []);
 
-  const handleDeleteTutorial = async (id: string) => {
-    if (confirm(t({ id: "Apakah Anda yakin ingin menghapus tutorial ini?", en: "Are you sure you want to delete this tutorial?" }))) {
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/";
+  };
+
+
+
+  const handleDeleteSubmission = async (id: string) => {
+    if (confirm(t({ id: "Apakah Anda yakin ingin menghapus usulan DevTool ini?", en: "Are you sure you want to delete this DevTool submission?" }))) {
       try {
-        const res = await fetch(`/api/blog/${id}`, { method: "DELETE" });
+        // We will call DELETE /api/extensions/[id] or handle it via db delete
+        const res = await fetch(`/api/extensions/${id}`, { method: "DELETE" });
         const data = await res.json();
         if (data.success) {
-          setTutorials(tutorials.filter((post) => post.id !== id));
+          setDbExtensions(dbExtensions.filter((ext) => ext.id !== id));
         } else {
-          alert(data.error || "Failed to delete tutorial.");
+          alert(data.error || "Failed to delete submission.");
         }
       } catch (err) {
-        console.error("Error deleting tutorial:", err);
+        console.error("Error deleting submission:", err);
       }
     }
   };
 
-  // Mock list of publisher submitted extensions
-  const [publisherExts, setPublisherExts] = useState([
-    {
-      id: "ext-1",
-      slug: "chatgpt-sidebar",
-      name: t({ id: "ChatGPT Sidebar & Pengunggah File", en: "ChatGPT Sidebar & File Uploader" }),
-      logoUrl: "🤖",
-      status: "approved",
-      clicks: 12450,
-      installs: 890,
-      rating: 4.8,
-      reviewsCount: 1420
-    },
-    {
-      id: "ext-custom-demo",
-      slug: "demo-ext",
-      name: t({ id: "Smart Auto-Fill Snippet Pintar", en: "Smart Auto-Fill Snippets" }),
-      logoUrl: "⚡",
-      status: "pending",
-      clicks: 0,
-      installs: 0,
-      rating: 0,
-      reviewsCount: 0
+  const removeBookmark = (slug: string) => {
+    try {
+      const stored = localStorage.getItem("roketdev_bookmarks");
+      if (stored) {
+        const bookmarks = JSON.parse(stored);
+        const filtered = bookmarks.filter((s: string) => s !== slug);
+        localStorage.setItem("roketdev_bookmarks", JSON.stringify(filtered));
+        setBookmarkedExtensions(bookmarkedExtensions.filter((e) => e.slug !== slug));
+      }
+    } catch (e) {
+      console.error(e);
     }
-  ]);
-
-  // Combined metrics
-  const totalClicks = publisherExts.reduce((acc, curr) => acc + curr.clicks, 0);
-  const totalInstalls = publisherExts.reduce((acc, curr) => acc + curr.installs, 0);
-
-  const handleDeleteDemo = (id: string) => {
-    setPublisherExts(publisherExts.filter((ext) => ext.id !== id));
   };
+
+
+
+  if (isLoading) {
+    return (
+      <PageWrapper>
+        <div className="flex-1 flex items-center justify-center min-h-[50vh]">
+          <div className="text-center space-y-3">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="text-xs text-muted-foreground font-semibold">
+              {t({ id: "Memuat dasbor...", en: "Loading dashboard..." })}
+            </p>
+          </div>
+        </div>
+      </PageWrapper>
+    );
+  }
 
   return (
     <PageWrapper>
@@ -102,16 +127,14 @@ export default function PublisherDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* Sidebar Navigation */}
-          <aside className="lg:col-span-3 space-y-2 border border-border bg-card p-4 rounded-2xl">
+          <aside className="lg:col-span-3 space-y-2 border border-border bg-card p-4 rounded-2xl shadow-sm">
             <div className="px-3 py-2 text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              {t({ id: "Panel Penerbit", en: "Publisher Panel" })}
+              {t({ id: "Panel Pengguna", en: "User Console" })}
             </div>
             
             {[
-              { id: "overview", label: t({ id: "📊 Statistik Ringkasan", en: "📊 Overview Stats" }), icon: BarChart3 },
-              { id: "extensions", label: t({ id: "🧩 DevTools Saya", en: "🧩 My DevTools" }), icon: Settings },
-              { id: "reviews", label: t({ id: "⭐ Kontrol Ulasan", en: "⭐ Review Control" }), icon: Star },
-              { id: "blog", label: t({ id: "📝 Tutorial Saya", en: "📝 My Tutorials" }), icon: BookOpen }
+              { id: "bookmarks", label: t({ id: "🔖 Bookmark Saya", en: "🔖 My Bookmarks" }), icon: Bookmark },
+              { id: "extensions", label: t({ id: "🧩 Usulan DevTool Saya", en: "🧩 My Proposed Tools" }), icon: Settings }
             ].map((tab) => {
               const Icon = tab.icon;
               return (
@@ -130,6 +153,20 @@ export default function PublisherDashboard() {
               );
             })}
 
+            {userRole === "admin" && (
+              <>
+                <hr className="border-border/60 my-2" />
+                <Link
+                  href="/admin"
+                  target="_blank"
+                  className="w-full text-left text-xs font-semibold py-2.5 px-3 rounded-xl transition-all flex items-center gap-2 text-amber-500 hover:bg-amber-500/5 border border-amber-500/20 bg-amber-500/5 font-bold"
+                >
+                  <Settings className="h-4 w-4" />
+                  {t({ id: "⚙️ Panel Kontrol Admin", en: "⚙️ Admin Control Panel" })}
+                </Link>
+              </>
+            )}
+
             <hr className="border-border/60 my-2" />
 
             <Link
@@ -140,81 +177,74 @@ export default function PublisherDashboard() {
               {t({ id: "Kirim DevTool", en: "Submit DevTool" })}
             </Link>
 
-            <Link
-              href="/"
+            <button
+              onClick={handleSignOut}
               className="w-full text-left text-xs font-semibold py-2.5 px-3 rounded-xl transition-all flex items-center gap-2 text-rose-500 hover:bg-rose-500/5"
             >
               <LogOut className="h-4 w-4" />
-              {t({ id: "Keluar", en: "Sign Out" })}
-            </Link>
+              {t({ id: "Keluar Sesi", en: "Sign Out" })}
+            </button>
           </aside>
 
           {/* Main Dashboard panel */}
           <div className="lg:col-span-9 space-y-6">
             
-            {/* Tab: Overview */}
-            {activeTab === "overview" && (
+
+
+            {/* Tab: Bookmarks List */}
+            {activeTab === "bookmarks" && (
               <div className="space-y-6">
                 <div>
-                  <h1 className="text-2xl font-bold tracking-tight">{t({ id: "Dasbor Analitik", en: "Analytics Dashboard" })}</h1>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {t({
-                      id: "Kelola daftar produk, pantau metrik, dan lacak unduhan pengguna.",
-                      en: "Manage listings, monitor metrics, and track user downloads."
-                    })}
-                  </p>
+                  <h2 className="text-xl font-bold tracking-tight">{t({ id: "Bookmark Saya", en: "My Bookmarks" })}</h2>
+                  <p className="text-xs text-muted-foreground mt-1">{t({ id: "Koleksi DevTools pilihan yang Anda simpan.", en: "Your curated list of saved DevTools." })}</p>
                 </div>
 
-                {/* Metrics row */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  <div className="rounded-2xl border border-border bg-card p-5 space-y-2">
-                    <div className="flex items-center justify-between text-muted-foreground">
-                      <span className="text-xs font-bold uppercase tracking-wider">{t({ id: "Total Klik Pengalihan", en: "Total Redirect Clicks" })}</span>
-                      <MousePointerClick className="h-4 w-4 text-primary" />
+                {bookmarkedExtensions.length === 0 ? (
+                  <div className="rounded-2xl border border-border border-dashed p-12 text-center space-y-4 bg-card">
+                    <Bookmark className="h-8 w-8 text-muted-foreground/50 mx-auto animate-pulse" />
+                    <div>
+                      <h4 className="text-xs font-bold text-foreground">{t({ id: "Belum Ada Bookmark", en: "No Bookmarks Yet" })}</h4>
+                      <p className="text-[11px] text-muted-foreground mt-1 max-w-sm mx-auto">
+                        {t({
+                          id: "Anda belum menyimpan DevTool apa pun. Telusuri direktori kami dan simpan beberapa favorit!",
+                          en: "You haven't bookmarked any DevTools yet. Browse our directory and save some favorites!"
+                        })}
+                      </p>
                     </div>
-                    <p className="text-3xl font-extrabold text-foreground">{formatNumber(totalClicks)}</p>
-                    <span className="text-[10px] text-emerald-500 font-semibold">{t({ id: "↑ 12.4% dari minggu lalu", en: "↑ 12.4% from last week" })}</span>
+                    <Link
+                      href="/extensions"
+                      className="inline-flex rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/95 transition-all shadow-sm"
+                    >
+                      {t({ id: "Telusuri Direktori", en: "Browse Directory" })}
+                    </Link>
                   </div>
-
-                  <div className="rounded-2xl border border-border bg-card p-5 space-y-2">
-                    <div className="flex items-center justify-between text-muted-foreground">
-                      <span className="text-xs font-bold uppercase tracking-wider">{t({ id: "Estimasi Pemasangan", en: "Est. Installs" })}</span>
-                      <Download className="h-4 w-4 text-emerald-500" />
-                    </div>
-                    <p className="text-3xl font-extrabold text-foreground">{formatNumber(totalInstalls)}</p>
-                    <span className="text-[10px] text-emerald-500 font-semibold">{t({ id: "↑ 8.2% dari minggu lalu", en: "↑ 8.2% from last week" })}</span>
-                  </div>
-
-                  <div className="rounded-2xl border border-border bg-card p-5 space-y-2">
-                    <div className="flex items-center justify-between text-muted-foreground">
-                      <span className="text-xs font-bold uppercase tracking-wider">{t({ id: "Rata-rata Rating", en: "Avg Rating" })}</span>
-                      <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                    </div>
-                    <p className="text-3xl font-extrabold text-foreground">4.8★</p>
-                    <span className="text-[10px] text-muted-foreground">{t({ id: "Di semua produk", en: "Across all properties" })}</span>
-                  </div>
-                </div>
-
-                {/* Growth chart mockup */}
-                <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
-                  <h2 className="text-sm font-bold tracking-wider uppercase text-foreground">
-                    {t({
-                      id: "Analitik Klik & Pemasangan (30 Hari Terakhir)",
-                      en: "Click & Install Analytics (Last 30 Days)"
-                    })}
-                  </h2>
-                  <div className="h-48 border border-border/40 rounded-xl bg-secondary/10 flex items-end justify-between px-6 pb-2 pt-6">
-                    {[12, 18, 15, 24, 30, 28, 35, 42, 38, 50].map((val, idx) => (
-                      <div key={idx} className="flex flex-col items-center gap-2 w-full max-w-[20px]">
-                        <div 
-                          className="w-full bg-primary rounded-t transition-all duration-500 hover:bg-primary/80" 
-                          style={{ height: `${val * 3}px` }}
-                        />
-                        <span className="text-[8px] text-muted-foreground">{t({ id: "Jun", en: "Jun" })} {idx * 3 + 1}</span>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {bookmarkedExtensions.map((ext) => (
+                      <div key={ext.id} className="border border-border rounded-2xl bg-card p-4 flex flex-col justify-between hover:shadow-sm transition-all">
+                        <div className="flex gap-3">
+                          <span className="text-2xl bg-secondary h-11 w-11 flex items-center justify-center rounded-xl border border-border shadow-sm">{ext.logoUrl || "🧩"}</span>
+                          <div className="min-w-0">
+                            <Link href={`/extensions/${ext.slug}`} className="font-bold text-sm text-foreground hover:text-primary transition-colors block truncate">{ext.name}</Link>
+                            <span className="text-[10px] text-muted-foreground block truncate">{ext.tagline}</span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 mt-4 pt-3 border-t border-border/40 justify-end">
+                          <Link href={`/extensions/${ext.slug}`} className="px-3 py-1.5 text-[11px] font-semibold bg-secondary rounded-lg hover:bg-secondary/80 text-foreground transition-all">
+                            {t({ id: "Lihat", en: "View" })}
+                          </Link>
+                          <button
+                            onClick={() => removeBookmark(ext.slug)}
+                            className="px-2.5 py-1.5 text-[10px] font-semibold text-rose-500 hover:bg-rose-500/5 rounded-lg border border-border hover:border-rose-500/20 transition-all flex items-center gap-1"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                            {t({ id: "Hapus", en: "Remove" })}
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
-                </div>
+                )}
               </div>
             )}
 
@@ -223,8 +253,12 @@ export default function PublisherDashboard() {
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-bold tracking-tight">{t({ id: "Produk yang Dikirim", en: "Submitted Properties" })}</h2>
-                    <p className="text-xs text-muted-foreground mt-1">{t({ id: "Devtools terdaftar dan status audit Anda.", en: "Your registered devtools and status audits." })}</p>
+                    <h2 className="text-xl font-bold tracking-tight">
+                      {userRole === "admin" ? t({ id: "Semua Usulan DevTool", en: "All DevTool Submissions" }) : t({ id: "Usulan DevTool Saya", en: "My DevTool Submissions" })}
+                    </h2>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {userRole === "admin" ? t({ id: "Daftar pengajuan produk dari seluruh pengguna.", en: "Product submissions from all users." }) : t({ id: "Daftar pengajuan produk Anda dan status auditasinya.", en: "Your submitted products and audit status." })}
+                    </p>
                   </div>
                   <Link
                     href="/submit"
@@ -245,197 +279,55 @@ export default function PublisherDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/60 text-muted-foreground">
-                      {publisherExts.map((ext) => (
-                        <tr key={ext.id} className="hover:bg-secondary/20 transition-all">
-                          <td className="p-4 font-semibold text-foreground flex items-center gap-2">
-                            <span className="text-xl bg-secondary p-1 rounded border border-border">{ext.logoUrl}</span>
-                            <Link href={`/extensions/${ext.slug}`} className="hover:underline">{ext.name}</Link>
-                          </td>
-                          <td className="p-4">
-                            {ext.status === "approved" ? (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-500 bg-emerald-500/5 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                                <CheckCircle className="h-3 w-3" />
-                                {t({ id: "Aktif", en: "Active" })}
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-500 bg-amber-500/5 px-2 py-0.5 rounded-full border border-amber-500/20">
-                                <Clock className="h-3 w-3" />
-                                {t({ id: "Dalam Peninjauan", en: "Review Audit" })}
-                              </span>
-                            )}
-                          </td>
-                          <td className="p-4 space-y-0.5">
-                            <div>{t({ id: "Klik:", en: "Clicks:" })} <span className="font-semibold text-foreground">{ext.clicks}</span></div>
-                            <div>{t({ id: "Pemasangan:", en: "Installs:" })} <span className="font-semibold text-foreground">{ext.installs}</span></div>
-                          </td>
-                          <td className="p-4 text-right">
-                            <button
-                              onClick={() => handleDeleteDemo(ext.id)}
-                              className="p-1.5 rounded-lg border border-border hover:bg-rose-500/5 hover:text-rose-500 hover:border-rose-500/20 transition-all"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
+                      {dbExtensions.length === 0 ? (
+                        <tr>
+                          <td colSpan={4} className="text-center p-8 text-muted-foreground italic">
+                            {t({ id: "Belum ada usulan DevTool.", en: "No DevTool submissions yet." })}
                           </td>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-
-            {/* Tab: Review management */}
-            {activeTab === "reviews" && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-xl font-bold tracking-tight">{t({ id: "Kontrol Ulasan", en: "Review Control" })}</h2>
-                  <p className="text-xs text-muted-foreground mt-1">{t({ id: "Baca dan balas masukan pengguna pada devtools Anda.", en: "Read and reply to user feedback on your devtools." })}</p>
-                </div>
-
-                <div className="space-y-4">
-                  {/* Pull reviews for ext-1 from mockReviews */}
-                  {(mockReviews["ext-1"] || []).map((rev) => (
-                    <div key={rev.id} className="rounded-2xl border border-border bg-card p-5 space-y-3">
-                      <div className="flex justify-between items-center text-xs">
-                        <div className="flex items-center gap-2">
-                          <img 
-                            src={rev.userAvatarUrl} 
-                            alt={rev.userName} 
-                            className="h-7 w-7 rounded-full object-cover border border-border"
-                          />
-                          <span className="font-bold text-foreground">{rev.userName}</span>
-                          <span className="text-muted-foreground">{t({ id: "pada ChatGPT Sidebar", en: "on ChatGPT Sidebar" })}</span>
-                        </div>
-                        
-                        <div className="flex gap-0.5">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <Star 
-                              key={i} 
-                              className={`h-3 w-3 ${
-                                i < rev.rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/35"
-                              }`} 
-                            />
-                          ))}
-                        </div>
-                      </div>
-
-                      <h4 className="text-sm font-semibold text-foreground">{rev.title}</h4>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{rev.body}</p>
-
-                      <div className="flex items-center justify-between text-[10px] pt-2 border-t border-border/40">
-                        <span className="text-muted-foreground">{formatDate(rev.createdAt)}</span>
-                        <button className="text-primary font-semibold hover:underline">
-                          {t({ id: "Tulis balasan →", en: "Write reply →" })}
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Tab: Tutorials List */}
-            {activeTab === "blog" && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-xl font-bold tracking-tight">{t({ id: "Tutorial & Panduan Developer", en: "Tutorials & Developer Guides" })}</h2>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {t({
-                        id: "Tulis panduan bermanfaat untuk menarik trafik pengunjung ke produk devtool Anda.",
-                        en: "Write helpful guides to drive user traffic to your devtool properties."
-                      })}
-                    </p>
-                  </div>
-                  <Link
-                    href="/dashboard/blog/new"
-                    className="rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/95 transition-all shadow-sm flex items-center gap-1"
-                  >
-                    <PlusCircle className="h-3.5 w-3.5" />
-                    {t({ id: "Tulis Baru", en: "Write New" })}
-                  </Link>
-                </div>
-
-                {loadingTutorials ? (
-                  <div className="text-center py-12 text-xs text-muted-foreground">
-                    {t({ id: "Memuat tutorial...", en: "Loading tutorials..." })}
-                  </div>
-                ) : tutorials.length === 0 ? (
-                  <div className="rounded-2xl border border-border border-dashed p-12 text-center space-y-4 bg-card">
-                    <BookOpen className="h-8 w-8 text-muted-foreground/50 mx-auto" />
-                    <div>
-                      <h4 className="text-xs font-bold text-foreground">{t({ id: "Belum Ada Tutorial", en: "No Tutorials Yet" })}</h4>
-                      <p className="text-[11px] text-muted-foreground mt-1 max-w-sm mx-auto">
-                        {t({
-                          id: "Anda belum menulis tutorial apa pun. Tulis panduan pertama Anda hari ini untuk meningkatkan unduhan produk Anda!",
-                          en: "You haven't written any tutorials yet. Create your first guide today to boost your product downloads!"
-                        })}
-                      </p>
-                    </div>
-                    <Link
-                      href="/dashboard/blog/new"
-                      className="inline-flex rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/95 transition-all shadow-sm"
-                    >
-                      {t({ id: "Tulis Tutorial Pertama", en: "Write First Tutorial" })}
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="border border-border rounded-2xl bg-card overflow-hidden">
-                    <table className="w-full text-left border-collapse text-xs">
-                      <thead>
-                        <tr className="bg-secondary/40 border-b border-border/60 text-muted-foreground font-semibold uppercase tracking-wider">
-                          <th className="p-4">{t({ id: "Tutorial", en: "Tutorial" })}</th>
-                          <th className="p-4">{t({ id: "Kategori", en: "Category" })}</th>
-                          <th className="p-4">{t({ id: "Status", en: "Status" })}</th>
-                          <th className="p-4">{t({ id: "Estimasi Baca", en: "Reading Time" })}</th>
-                          <th className="p-4 text-right">{t({ id: "Aksi", en: "Actions" })}</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border/60 text-muted-foreground">
-                        {tutorials.map((post) => (
-                          <tr key={post.id} className="hover:bg-secondary/20 transition-all">
-                            <td className="p-4 font-semibold text-foreground">
-                              <div className="flex flex-col gap-0.5">
-                                <Link href={`/blog/${post.slug}`} className="hover:underline text-foreground text-xs line-clamp-1">
-                                  {post.title}
-                                </Link>
-                                <span className="text-[10px] text-muted-foreground flex items-center gap-1 font-normal">
-                                  <Calendar className="h-2.5 w-2.5" />
-                                  {new Date(post.createdAt).toLocaleDateString(language === "id" ? "id-ID" : "en-US", { year: "numeric", month: "short", day: "numeric" })}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="p-4 capitalize">
-                              {post.categorySlug?.replace("-", " ")}
+                      ) : (
+                        dbExtensions.map((ext) => (
+                          <tr key={ext.id} className="hover:bg-secondary/20 transition-all">
+                            <td className="p-4 font-semibold text-foreground flex items-center gap-2">
+                              <span className="text-xl bg-secondary p-1 rounded border border-border">{ext.logoUrl || "🧩"}</span>
+                              <Link href={`/extensions/${ext.slug}`} className="hover:underline">{ext.name}</Link>
                             </td>
                             <td className="p-4">
-                              {post.status === "published" ? (
+                              {ext.status === "approved" || ext.status === "featured" ? (
                                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-500 bg-emerald-500/5 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                                  {t({ id: "Publik", en: "Published" })}
+                                  <CheckCircle className="h-3 w-3" />
+                                  {t({ id: "Aktif", en: "Active" })}
+                                </span>
+                              ) : ext.status === "rejected" ? (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-rose-500 bg-rose-500/5 px-2 py-0.5 rounded-full border border-rose-500/20">
+                                  <Trash2 className="h-3 w-3" />
+                                  {t({ id: "Ditolak", en: "Rejected" })}
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded-full border border-border">
-                                  {t({ id: "Draf", en: "Draft" })}
+                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-500 bg-amber-500/5 px-2 py-0.5 rounded-full border border-amber-500/20">
+                                  <Clock className="h-3 w-3" />
+                                  {t({ id: "Dalam Peninjauan", en: "Review Audit" })}
                                 </span>
                               )}
                             </td>
-                            <td className="p-4">
-                              {post.readingTimeMinutes} {t({ id: "menit", en: "min" })}
+                            <td className="p-4 space-y-0.5">
+                              <div>{t({ id: "Klik:", en: "Clicks:" })} <span className="font-semibold text-foreground">{ext.clickCount || 0}</span></div>
+                              <div>{t({ id: "Pemasangan:", en: "Installs:" })} <span className="font-semibold text-foreground">{ext.totalInstalls || 0}</span></div>
                             </td>
                             <td className="p-4 text-right">
                               <button
-                                onClick={() => handleDeleteTutorial(post.id)}
+                                onClick={() => handleDeleteSubmission(ext.id)}
                                 className="p-1.5 rounded-lg border border-border hover:bg-rose-500/5 hover:text-rose-500 hover:border-rose-500/20 transition-all"
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>
                             </td>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
 

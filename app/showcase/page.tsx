@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { mockSourceCodes, mockExtensions } from "@/config/mock-data";
 import { Play, ExternalLink, ArrowRight, Laptop, HelpCircle, Sparkles } from "lucide-react";
@@ -11,11 +11,51 @@ export default function ShowcasePage() {
   const { t, tExtension, tSourceCode } = useLanguage();
   const [activeTab, setActiveTab] = useState<"all" | "source-code" | "devtools">("all");
 
+  const [extensionsList, setExtensionsList] = useState<any[]>([]);
+  const [sourceCodesList, setSourceCodesList] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchShowcaseData = async () => {
+      try {
+        const [extRes, scRes] = await Promise.all([
+          fetch("/api/extensions"),
+          fetch("/api/source-code")
+        ]);
+
+        const [extData, scData] = await Promise.all([
+          extRes.json(),
+          scRes.json()
+        ]);
+
+        if (extData.success && extData.extensions.length > 0) {
+          setExtensionsList(extData.extensions);
+        } else {
+          setExtensionsList(mockExtensions);
+        }
+
+        if (scData.success && scData.sourceCodes.length > 0) {
+          setSourceCodesList(scData.sourceCodes);
+        } else {
+          setSourceCodesList(mockSourceCodes);
+        }
+      } catch (err) {
+        console.error("Failed to load showcase data from DB:", err);
+        setExtensionsList(mockExtensions);
+        setSourceCodesList(mockSourceCodes);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchShowcaseData();
+  }, []);
+
   const showcaseItems = useMemo(() => {
     const list: any[] = [];
     
     // Add Source Codes
-    mockSourceCodes.map(tSourceCode).forEach((sc) => {
+    sourceCodesList.map(tSourceCode).forEach((sc) => {
       list.push({
         id: sc.id,
         type: "source-code",
@@ -30,7 +70,7 @@ export default function ShowcasePage() {
     });
 
     // Add DevTools (only the ones with demo or website links)
-    mockExtensions.map(tExtension).forEach((ext) => {
+    extensionsList.map(tExtension).forEach((ext) => {
       list.push({
         id: ext.id,
         type: "devtools",
@@ -45,7 +85,7 @@ export default function ShowcasePage() {
     });
 
     return list;
-  }, [t, tExtension, tSourceCode]);
+  }, [t, tExtension, tSourceCode, extensionsList, sourceCodesList]);
 
   const filteredItems = useMemo(() => {
     if (activeTab === "all") return showcaseItems;

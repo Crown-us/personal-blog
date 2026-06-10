@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -10,6 +10,28 @@ export default function Footer() {
   const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "success">("idle");
+  const [visitorCount, setVisitorCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    const hasVisitedSession = sessionStorage.getItem("has_visited_session");
+    const method = hasVisitedSession ? "GET" : "POST";
+
+    fetch("/api/visitors", {
+      method: method,
+      headers: { "Content-Type": "application/json" },
+      body: method === "POST" ? JSON.stringify({ referrer: typeof document !== "undefined" ? document.referrer : null }) : undefined,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setVisitorCount(data.count);
+          if (method === "POST") {
+            sessionStorage.setItem("has_visited_session", "true");
+          }
+        }
+      })
+      .catch((err) => console.error("Failed to load visitor stats:", err));
+  }, []);
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -268,6 +290,14 @@ export default function Footer() {
             <span>
               © {new Date().getFullYear()} RoketDev. {t({ id: "Seluruh hak cipta dilindungi.", en: "All rights reserved." })}
             </span>
+            {visitorCount !== null && (
+              <>
+                <span className="hidden md:inline text-neutral-200 dark:text-neutral-800">|</span>
+                <span className="flex items-center gap-1">
+                  👁️ {t({ id: "Total Kunjungan:", en: "Total Visits:" })} <strong className="text-neutral-800 dark:text-white font-bold">{visitorCount}</strong>
+                </span>
+              </>
+            )}
             <span className="hidden md:inline text-neutral-200 dark:text-neutral-800">|</span>
             <span>
               {t({

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, Suspense } from "react";
+import React, { useMemo, useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { mockExtensions } from "@/config/mock-data";
@@ -20,17 +20,37 @@ function ComparisonContent() {
     return idsParam ? idsParam.split(",").filter(Boolean) : [];
   }, [idsParam]);
 
+  const [extensionsList, setExtensionsList] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/extensions")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.extensions.length > 0) {
+          setExtensionsList(data.extensions);
+        } else {
+          setExtensionsList(mockExtensions);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load extensions for comparison:", err);
+        setExtensionsList(mockExtensions);
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
+
   // Find corresponding extensions with translation
   const comparedExtensions = useMemo(() => {
-    return mockExtensions
+    return extensionsList
       .filter((ext) => comparedIds.includes(ext.id))
       .map(tExtension);
-  }, [comparedIds, tExtension]);
+  }, [comparedIds, extensionsList, tExtension]);
 
   // All extensions for replacement dropdowns with translation
   const availableExtensions = useMemo(() => {
-    return mockExtensions.map(tExtension);
-  }, [tExtension]);
+    return extensionsList.map(tExtension);
+  }, [extensionsList, tExtension]);
 
   // Change compared extension at index
   const handleReplaceExtension = (index: number, newId: string) => {

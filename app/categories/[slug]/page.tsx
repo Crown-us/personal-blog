@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useMemo } from "react";
+import React, { use, useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import ExtensionCard from "@/components/shared/ExtensionCard";
 import CompareTray from "@/components/shared/CompareTray";
@@ -89,12 +89,30 @@ export default function CategoryDetail({ params }: { params: Promise<{ slug: str
     return getTranslatedCategory(cat);
   }, [slug, language]);
 
+  const [extensionsList, setExtensionsList] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`/api/extensions?category=${slug}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.extensions.length > 0) {
+          setExtensionsList(data.extensions);
+        } else {
+          setExtensionsList(mockExtensions.filter((ext) => ext.categorySlug === slug));
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load category extensions:", err);
+        setExtensionsList(mockExtensions.filter((ext) => ext.categorySlug === slug));
+      })
+      .finally(() => setIsLoading(false));
+  }, [slug]);
+
   // Filter matching extensions with translation
   const matchingExtensions = useMemo(() => {
-    return mockExtensions
-      .filter((ext) => ext.categoryId === slug)
-      .map(tExtension);
-  }, [slug, tExtension]);
+    return extensionsList.map(tExtension);
+  }, [extensionsList, tExtension]);
 
   if (!categoryMeta) {
     return (

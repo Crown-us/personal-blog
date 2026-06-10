@@ -184,6 +184,7 @@ export default function Navbar() {
 
           <Link
             href="/dashboard"
+            target="_blank"
             className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
           >
             <LayoutDashboard className="h-3.5 w-3.5" />
@@ -256,6 +257,7 @@ export default function Navbar() {
             <div className="flex items-center justify-between pt-1">
               <Link
                 href="/dashboard"
+                target="_blank"
                 onClick={() => setIsOpen(false)}
                 className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground"
               >
