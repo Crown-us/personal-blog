@@ -12,7 +12,9 @@ import {
   Settings, 
   LogOut, 
   Trash2,
-  Filter
+  Filter,
+  BookOpen,
+  Calendar
 } from "lucide-react";
 import { mockExtensions, mockReviews } from "@/config/mock-data";
 import { formatDate, formatNumber } from "@/lib/utils";
@@ -23,6 +25,40 @@ import PageWrapper from "@/components/shared/PageWrapper";
 export default function PublisherDashboard() {
   const { t, language } = useLanguage();
   const [activeTab, setActiveTab] = useState("overview");
+  const [tutorials, setTutorials] = useState<any[]>([]);
+  const [loadingTutorials, setLoadingTutorials] = useState(false);
+
+  // Fetch tutorials when tab is selected
+  React.useEffect(() => {
+    if (activeTab === "blog") {
+      setLoadingTutorials(true);
+      fetch("/api/blog")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            setTutorials(data.posts);
+          }
+        })
+        .catch((err) => console.error("Error fetching tutorials:", err))
+        .finally(() => setLoadingTutorials(false));
+    }
+  }, [activeTab]);
+
+  const handleDeleteTutorial = async (id: string) => {
+    if (confirm(t({ id: "Apakah Anda yakin ingin menghapus tutorial ini?", en: "Are you sure you want to delete this tutorial?" }))) {
+      try {
+        const res = await fetch(`/api/blog/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        if (data.success) {
+          setTutorials(tutorials.filter((post) => post.id !== id));
+        } else {
+          alert(data.error || "Failed to delete tutorial.");
+        }
+      } catch (err) {
+        console.error("Error deleting tutorial:", err);
+      }
+    }
+  };
 
   // Mock list of publisher submitted extensions
   const [publisherExts, setPublisherExts] = useState([
@@ -74,7 +110,8 @@ export default function PublisherDashboard() {
             {[
               { id: "overview", label: t({ id: "📊 Statistik Ringkasan", en: "📊 Overview Stats" }), icon: BarChart3 },
               { id: "extensions", label: t({ id: "🧩 DevTools Saya", en: "🧩 My DevTools" }), icon: Settings },
-              { id: "reviews", label: t({ id: "⭐ Kontrol Ulasan", en: "⭐ Review Control" }), icon: Star }
+              { id: "reviews", label: t({ id: "⭐ Kontrol Ulasan", en: "⭐ Review Control" }), icon: Star },
+              { id: "blog", label: t({ id: "📝 Tutorial Saya", en: "📝 My Tutorials" }), icon: BookOpen }
             ].map((tab) => {
               const Icon = tab.icon;
               return (
@@ -294,6 +331,111 @@ export default function PublisherDashboard() {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Tab: Tutorials List */}
+            {activeTab === "blog" && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold tracking-tight">{t({ id: "Tutorial & Panduan Developer", en: "Tutorials & Developer Guides" })}</h2>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {t({
+                        id: "Tulis panduan bermanfaat untuk menarik trafik pengunjung ke produk devtool Anda.",
+                        en: "Write helpful guides to drive user traffic to your devtool properties."
+                      })}
+                    </p>
+                  </div>
+                  <Link
+                    href="/dashboard/blog/new"
+                    className="rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/95 transition-all shadow-sm flex items-center gap-1"
+                  >
+                    <PlusCircle className="h-3.5 w-3.5" />
+                    {t({ id: "Tulis Baru", en: "Write New" })}
+                  </Link>
+                </div>
+
+                {loadingTutorials ? (
+                  <div className="text-center py-12 text-xs text-muted-foreground">
+                    {t({ id: "Memuat tutorial...", en: "Loading tutorials..." })}
+                  </div>
+                ) : tutorials.length === 0 ? (
+                  <div className="rounded-2xl border border-border border-dashed p-12 text-center space-y-4 bg-card">
+                    <BookOpen className="h-8 w-8 text-muted-foreground/50 mx-auto" />
+                    <div>
+                      <h4 className="text-xs font-bold text-foreground">{t({ id: "Belum Ada Tutorial", en: "No Tutorials Yet" })}</h4>
+                      <p className="text-[11px] text-muted-foreground mt-1 max-w-sm mx-auto">
+                        {t({
+                          id: "Anda belum menulis tutorial apa pun. Tulis panduan pertama Anda hari ini untuk meningkatkan unduhan produk Anda!",
+                          en: "You haven't written any tutorials yet. Create your first guide today to boost your product downloads!"
+                        })}
+                      </p>
+                    </div>
+                    <Link
+                      href="/dashboard/blog/new"
+                      className="inline-flex rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/95 transition-all shadow-sm"
+                    >
+                      {t({ id: "Tulis Tutorial Pertama", en: "Write First Tutorial" })}
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="border border-border rounded-2xl bg-card overflow-hidden">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="bg-secondary/40 border-b border-border/60 text-muted-foreground font-semibold uppercase tracking-wider">
+                          <th className="p-4">{t({ id: "Tutorial", en: "Tutorial" })}</th>
+                          <th className="p-4">{t({ id: "Kategori", en: "Category" })}</th>
+                          <th className="p-4">{t({ id: "Status", en: "Status" })}</th>
+                          <th className="p-4">{t({ id: "Estimasi Baca", en: "Reading Time" })}</th>
+                          <th className="p-4 text-right">{t({ id: "Aksi", en: "Actions" })}</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border/60 text-muted-foreground">
+                        {tutorials.map((post) => (
+                          <tr key={post.id} className="hover:bg-secondary/20 transition-all">
+                            <td className="p-4 font-semibold text-foreground">
+                              <div className="flex flex-col gap-0.5">
+                                <Link href={`/blog/${post.slug}`} className="hover:underline text-foreground text-xs line-clamp-1">
+                                  {post.title}
+                                </Link>
+                                <span className="text-[10px] text-muted-foreground flex items-center gap-1 font-normal">
+                                  <Calendar className="h-2.5 w-2.5" />
+                                  {new Date(post.createdAt).toLocaleDateString(language === "id" ? "id-ID" : "en-US", { year: "numeric", month: "short", day: "numeric" })}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="p-4 capitalize">
+                              {post.categorySlug?.replace("-", " ")}
+                            </td>
+                            <td className="p-4">
+                              {post.status === "published" ? (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-500 bg-emerald-500/5 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                                  {t({ id: "Publik", en: "Published" })}
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded-full border border-border">
+                                  {t({ id: "Draf", en: "Draft" })}
+                                </span>
+                              )}
+                            </td>
+                            <td className="p-4">
+                              {post.readingTimeMinutes} {t({ id: "menit", en: "min" })}
+                            </td>
+                            <td className="p-4 text-right">
+                              <button
+                                onClick={() => handleDeleteTutorial(post.id)}
+                                className="p-1.5 rounded-lg border border-border hover:bg-rose-500/5 hover:text-rose-500 hover:border-rose-500/20 transition-all"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
 

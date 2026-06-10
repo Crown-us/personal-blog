@@ -1,21 +1,75 @@
 "use client";
 
-import React, { use, useMemo } from "react";
+import React, { use, useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { mockBlogPosts, mockExtensions, mockSourceCodes } from "@/config/mock-data";
 import { Calendar, Clock, ChevronLeft, ArrowRight, Share2, Tag } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
 import PageWrapper from "@/components/shared/PageWrapper";
 
+// Custom markdown preview renderer
+function parseMarkdown(text: string): string {
+  if (!text) return "";
+  let html = text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
+    return `<pre class="bg-secondary/60 p-4 rounded-xl font-mono text-xs overflow-x-auto border border-border/80 my-4 text-foreground"><code class="language-${lang}">${code.trim()}</code></pre>`;
+  });
+
+  html = html.replace(/`([^`]+)`/g, '<code class="bg-secondary px-1.5 py-0.5 rounded font-mono text-[11px] border border-border/80 text-foreground">$1</code>');
+  html = html.replace(/^#\s+(.+)$/gm, '<h1 class="text-xl font-bold mt-6 mb-3 text-foreground">$1</h1>');
+  html = html.replace(/^##\s+(.+)$/gm, '<h2 class="text-lg font-bold mt-5 mb-2.5 text-foreground">$1</h2>');
+  html = html.replace(/^###\s+(.+)$/gm, '<h3 class="text-base font-bold mt-4 mb-2 text-foreground">$1</h3>');
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-foreground">$1</strong>');
+  html = html.replace(/\*([^*]+)\*/g, '<em class="italic">$1</em>');
+  html = html.replace(/^\s*-\s+(.+)$/gm, '<li class="list-disc ml-5 mb-1 text-muted-foreground">$1</li>');
+  html = html.replace(/^\s*>\s+(.+)$/gm, '<blockquote class="border-l-4 border-primary pl-4 py-1 my-3 text-muted-foreground italic">$1</blockquote>');
+  html = html.replace(/\n\n/g, '</p><p class="mb-4 text-sm sm:text-base leading-relaxed text-muted-foreground">');
+  
+  return `<p class="mb-4 text-sm sm:text-base leading-relaxed text-muted-foreground">${html}</p>`
+    .replace(/<p class="mb-4 text-sm sm:text-base leading-relaxed text-muted-foreground"><h/g, '<h')
+    .replace(/<\/h(\d)><\/p>/g, '</h$1>')
+    .replace(/<p class="mb-4 text-sm sm:text-base leading-relaxed text-muted-foreground"><pre/g, '<pre')
+    .replace(/<\/pre><\/p>/g, '</pre>');
+}
+
 export default function BlogPostDetail({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = use(params);
   const slug = resolvedParams.slug;
   const { language, t, dict, tBlog, tExtension, tSourceCode } = useLanguage();
 
+  const [dbPost, setDbPost] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/blog")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          const found = data.posts.find((p: any) => p.slug === slug);
+          if (found) {
+            setDbPost(found);
+          }
+        }
+      })
+      .catch((err) => console.error("Error fetching blog post:", err))
+      .finally(() => setIsLoading(false));
+  }, [slug]);
+
   const post = useMemo(() => {
+    if (dbPost) {
+      return {
+        ...dbPost,
+        category: dbPost.categorySlug?.replace("-", " ") || "General",
+        tags: dbPost.tags || [],
+      };
+    }
     const orig = mockBlogPosts.find((p) => p.slug === slug);
-    return tBlog(orig);
-  }, [slug, tBlog]);
+    return orig ? tBlog(orig) : null;
+  }, [dbPost, slug, tBlog]);
 
   // Embed a contextual extension inside the blog post
   const embeddedExtension = useMemo(() => {
@@ -131,57 +185,64 @@ export default function BlogPostDetail({ params }: { params: Promise<{ slug: str
           </div>
 
           {/* Content Body */}
-          <div className="prose dark:prose-invert max-w-none py-6 space-y-6 text-sm sm:text-base text-muted-foreground leading-relaxed">
-            <p>{post.content}</p>
-            
-            <h3 className="text-lg font-bold text-foreground pt-4">
-              {t({
-                id: "Mengapa menjalankan model di dalam ekstensi browser menyederhanakan kompleksitas UI",
-                en: "Why running models inside browser extensions simplifies UI complexity"
-              })}
-            </h3>
-            <p>
-              {t({
-                id: "Biasanya, menyalin-tempel blok kode, template email, atau ringkasan artikel dari bidang teks ke modul obrolan menimbulkan gesekan tata letak yang besar. Integrasi langsung ke panel samping browser atau menu konteks klik kanan Anda memungkinkan Anda meringkas konten dalam 1 klik.",
-                en: "Typically, copy-pasting code blocks, email templates, or article briefs from text fields over to chat modules creates major layout friction. A direct integration into your browser side-panel or right-click context menu lets you summarize content in 1-click."
-              })}
-            </p>
+          {dbPost ? (
+            <div 
+              className="prose dark:prose-invert max-w-none py-6 space-y-6 text-sm sm:text-base text-muted-foreground leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: parseMarkdown(post.content) }}
+            />
+          ) : (
+            <div className="prose dark:prose-invert max-w-none py-6 space-y-6 text-sm sm:text-base text-muted-foreground leading-relaxed">
+              <p>{post.content}</p>
+              
+              <h3 className="text-lg font-bold text-foreground pt-4">
+                {t({
+                  id: "Mengapa menjalankan model di dalam ekstensi browser menyederhanakan kompleksitas UI",
+                  en: "Why running models inside browser extensions simplifies UI complexity"
+                })}
+              </h3>
+              <p>
+                {t({
+                  id: "Biasanya, menyalin-tempel blok kode, template email, atau ringkasan artikel dari bidang teks ke modul obrolan menimbulkan gesekan tata letak yang besar. Integrasi langsung ke panel samping browser atau menu konteks klik kanan Anda memungkinkan Anda meringkas konten dalam 1 klik.",
+                  en: "Typically, copy-pasting code blocks, email templates, or article briefs from text fields over to chat modules creates major layout friction. A direct integration into your browser side-panel or right-click context menu lets you summarize content in 1-click."
+                })}
+              </p>
 
-            {/* Contextual Curation Box Widget */}
-            {embeddedExtension && (
-              <div className="my-8 rounded-2xl border border-primary/20 bg-primary/5 p-6 flex flex-col sm:flex-row gap-6 justify-between items-center shadow-lg shadow-primary/5">
-                <div className="flex items-start gap-4">
-                  <span className="text-4xl shrink-0 bg-secondary/80 p-2.5 rounded-xl border border-border">
-                    {embeddedExtension.logoUrl}
-                  </span>
-                  <div>
-                    <span className="text-[10px] font-bold text-primary uppercase tracking-wide">
-                      {t({ id: "Rekomendasi Ekstensi Pilihan", en: "Featured Extension recommendation" })}
+              {/* Contextual Curation Box Widget */}
+              {embeddedExtension && (
+                <div className="my-8 rounded-2xl border border-primary/20 bg-primary/5 p-6 flex flex-col sm:flex-row gap-6 justify-between items-center shadow-lg shadow-primary/5">
+                  <div className="flex items-start gap-4">
+                    <span className="text-4xl shrink-0 bg-secondary/80 p-2.5 rounded-xl border border-border">
+                      {embeddedExtension.logoUrl}
                     </span>
-                    <h4 className="font-extrabold text-sm text-foreground mt-1">{embeddedExtension.name}</h4>
-                    <p className="text-xs text-muted-foreground mt-1">{embeddedExtension.tagline}</p>
+                    <div>
+                      <span className="text-[10px] font-bold text-primary uppercase tracking-wide">
+                        {t({ id: "Rekomendasi Ekstensi Pilihan", en: "Featured Extension recommendation" })}
+                      </span>
+                      <h4 className="font-extrabold text-sm text-foreground mt-1">{embeddedExtension.name}</h4>
+                      <p className="text-xs text-muted-foreground mt-1">{embeddedExtension.tagline}</p>
+                    </div>
                   </div>
+
+                  <a
+                    href={embeddedExtension.affiliateUrl || embeddedExtension.chromeStoreUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/95 transition-all shrink-0 flex items-center gap-1"
+                  >
+                    {t({ id: "Pasang Ekstensi", en: "Install Extension" })}
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </a>
                 </div>
+              )}
 
-                <a
-                  href={embeddedExtension.affiliateUrl || embeddedExtension.chromeStoreUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/95 transition-all shrink-0 flex items-center gap-1"
-                >
-                  {t({ id: "Pasang Ekstensi", en: "Install Extension" })}
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </a>
-              </div>
-            )}
-
-            <p>
-              {t({
-                id: "Ketika log audit diverifikasi, peringkat keamanan pengguna diperbarui. Dalam beberapa minggu mendatang kami akan menganalisis dan mengatalogkan lebih banyak plugin, memastikan bahwa izin manifes mengikuti panduan browser.",
-                en: "When audit logs are verified, user security rankings are updated. In the upcoming weeks we will be analyzing and cataloging more plugins, making sure that manifest permissions follow browser guidelines."
-              })}
-            </p>
-          </div>
+              <p>
+                {t({
+                  id: "Ketika log audit diverifikasi, peringkat keamanan pengguna diperbarui. Dalam beberapa minggu mendatang kami akan menganalisis dan mengatalogkan lebih banyak plugin, memastikan bahwa izin manifes mengikuti panduan browser.",
+                  en: "When audit logs are verified, user security rankings are updated. In the upcoming weeks we will be analyzing and cataloging more plugins, making sure that manifest permissions follow browser guidelines."
+                })}
+              </p>
+            </div>
+          )}
 
           {/* Tags list */}
           <div className="flex flex-wrap gap-2 pt-4">

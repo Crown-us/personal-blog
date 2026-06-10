@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { mockBlogPosts } from "@/config/mock-data";
 import { Calendar, Clock, BookOpen, ChevronRight } from "lucide-react";
@@ -10,24 +10,45 @@ import PageWrapper from "@/components/shared/PageWrapper";
 export default function BlogIndex() {
   const { language, t, dict, tBlog } = useLanguage();
   const [activeCategory, setActiveCategory] = useState("all");
+  const [blogPosts, setBlogPosts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/blog")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.posts.length > 0) {
+          setBlogPosts(data.posts);
+        } else {
+          setBlogPosts(mockBlogPosts);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching blog posts:", err);
+        setBlogPosts(mockBlogPosts);
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
 
   const categories = useMemo(() => {
-    const list = new Set(mockBlogPosts.map(tBlog).map((post) => post.category));
+    const list = new Set(blogPosts.map(tBlog).map((post) => post.category || post.categorySlug || "General"));
     return ["all", ...Array.from(list)];
-  }, [tBlog]);
+  }, [blogPosts, tBlog]);
 
   const filteredPosts = useMemo(() => {
-    const translated = mockBlogPosts.map(tBlog);
+    const translated = blogPosts.map(tBlog);
     if (activeCategory === "all") return translated;
-    return translated.filter((post) => post.category === activeCategory);
-  }, [activeCategory, tBlog]);
+    return translated.filter((post) => (post.category || post.categorySlug) === activeCategory);
+  }, [blogPosts, activeCategory, tBlog]);
 
   const featuredPost = useMemo(() => {
-    const translated = mockBlogPosts.map(tBlog);
+    const translated = blogPosts.map(tBlog);
+    if (translated.length === 0) return null;
     return translated.find((post) => post.isFeatured) || translated[0];
-  }, [tBlog]);
+  }, [blogPosts, tBlog]);
 
   const otherPosts = useMemo(() => {
+    if (!featuredPost) return filteredPosts;
     return filteredPosts.filter((post) => post.id !== featuredPost?.id);
   }, [filteredPosts, featuredPost]);
 

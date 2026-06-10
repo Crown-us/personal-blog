@@ -279,6 +279,24 @@ export const subscriptions = pgTable("subscriptions", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// ─── Source Codes ─────────────────────────────────────────────────────────────
+export const sourceCodes = pgTable("source_codes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
+  name: varchar("name", { length: 255 }).notNull(),
+  tagline: varchar("tagline", { length: 500 }),
+  description: text("description").notNull(),
+  techStack: text("tech_stack").array().notNull(),
+  price: varchar("price", { length: 50 }).notNull(),
+  priceRaw: integer("price_raw").notNull(),
+  thumbnail: text("thumbnail"),
+  screenshots: text("screenshots").array(),
+  demoLink: text("demo_link"),
+  category: varchar("category", { length: 100 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // ─── Type Exports ─────────────────────────────────────────────────────────────
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -292,3 +310,5 @@ export type Collection = typeof collections.$inferSelect;
 export type BlogPost = typeof blogPosts.$inferSelect;
 export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;
 export type NewsletterSubscriber = typeof newsletterSubscribers.$inferSelect;
+export type SourceCode = typeof sourceCodes.$inferSelect;
+export type NewSourceCode = typeof sourceCodes.$inferInsert;

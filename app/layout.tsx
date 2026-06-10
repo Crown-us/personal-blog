@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
+import GeminiChatWidget from "@/components/shared/GeminiChatWidget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,6 +46,7 @@ export default function RootLayout({
               {children}
             </div>
             <Footer />
+            <GeminiChatWidget />
           </LanguageProvider>
         </ThemeProvider>
       </body>

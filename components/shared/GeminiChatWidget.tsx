@@ -1,0 +1,309 @@
+"use client";
+
+import React, { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Bot, X, Send, Sparkles, MessageSquare } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+interface Message {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export default function GeminiChatWidget() {
+  const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: "assistant",
+      content:
+        "Halo bro! 👋 Saya **Asisten AI RoketDev**.\n\nAda yang bisa saya bantu hari ini? Kamu bisa tanya seputar *DevTools*, *Chrome Extensions*, atau *Boilerplate/Source Code* yang cocok untuk kebutuhan coding kamu! Contohnya:",
+    },
+  ]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasNewMessage, setHasNewMessage] = useState(true); // To trigger alert/dot on load
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-scroll to bottom
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      scrollToBottom();
+      inputRef.current?.focus();
+      setHasNewMessage(false);
+    }
+  }, [messages, isOpen, isLoading]);
+
+  // Clickable suggest chips
+  const suggestionChips = [
+    { label: "🏢 Template RT/RW", query: "Template fullstack buat manajemen RT RW" },
+    { label: "🤖 AI Blog SaaS", query: "Source code Nextjs buat platform blog AI" },
+    { label: "🧩 ChatGPT Sidebar", query: "Rekomendasi ekstensi asisten AI di browser" },
+    { label: "🎨 Portfolio Template", query: "Ada template portofolio developer?" },
+  ];
+
+  const handleSend = async (textToSend: string) => {
+    if (!textToSend.trim()) return;
+
+    const userMessage: Message = { role: "user", content: textToSend };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsLoading(true);
+
+    try {
+      // Format messages history into role/parts for Gemini API
+      const history = [...messages, userMessage].map((msg) => ({
+        role: msg.role,
+        parts: [{ text: msg.content }],
+      }));
+
+      const res = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: history }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Gagal terhubung ke API Gemini");
+      }
+
+      const data = await res.json();
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: data.content },
+      ]);
+    } catch (error) {
+      console.error(error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            "Aduh bro, maaf banget. Sepertinya ada gangguan koneksi ke server. Coba kirim ulang pesan kamu ya!",
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Simple client-side Markdown formatter (supports Bold, Bullet Lists, and Links)
+  const formatMessageText = (text: string) => {
+    let html = text;
+
+    // Escape HTML to prevent XSS
+    html = html
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+    // Bold formatting: **text** or *text*
+    html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+    // Bullet points: lines starting with "*" or "-"
+    const lines = html.split("\n");
+    const formattedLines = lines.map((line) => {
+      const trimmed = line.trim();
+      if (trimmed.startsWith("* ") || trimmed.startsWith("- ")) {
+        return `<li class="ml-4 list-disc my-1">${trimmed.substring(2)}</li>`;
+      }
+      return line;
+    });
+    html = formattedLines.join("\n");
+
+    // Markdown Links: [text](url)
+    // Note: Decode standard entity references to let URL work
+    html = html.replace(/\[(.*?)\]\((.*?)\)/g, (match, label, url) => {
+      const cleanUrl = url.replace(/&amp;/g, "&");
+      return `<a href="${cleanUrl}" class="text-primary hover:underline font-bold inline-flex items-center gap-0.5 border-b border-primary/20 decoration-2 transition-colors">${label}</a>`;
+    });
+
+    // Replace double newlines with spacing
+    html = html.replace(/\n\n/g, '<div class="h-2"></div>');
+    // Replace single newlines with br
+    html = html.replace(/\n/g, "<br />");
+
+    return html;
+  };
+
+  // Click Interceptor: Makes markdown links behave like client-side Router pushes
+  const handleMessageContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    if (target.tagName === "A") {
+      const href = target.getAttribute("href");
+      if (href && href.startsWith("/")) {
+        e.preventDefault();
+        router.push(href);
+        // On mobile, close widget after navigating
+        if (window.innerWidth < 768) {
+          setIsOpen(false);
+        }
+      }
+    }
+  };
+
+  return (
+    <>
+      {/* Floating Action Button */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-violet-600 via-indigo-600 to-primary text-white shadow-xl hover:shadow-primary/30 transition-all hover:scale-105 active:scale-95 group focus:outline-none"
+          aria-label="Tanya Gemini AI"
+        >
+          {/* Pulsing Glow Ring */}
+          <span className="absolute -inset-0.5 rounded-full bg-gradient-to-tr from-violet-600 to-primary opacity-30 blur group-hover:opacity-75 transition-all duration-300 animate-pulse"></span>
+          
+          <div className="relative z-10">
+            {isOpen ? (
+              <X className="h-6 w-6 transition-transform duration-250 rotate-90" />
+            ) : (
+              <Bot className="h-6 w-6 transition-transform duration-250 hover:rotate-6 animate-bounce-[duration:2s]" />
+            )}
+          </div>
+
+          {/* New message notification badge */}
+          {hasNewMessage && !isOpen && (
+            <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500 text-[9px] font-extrabold text-white items-center justify-center">
+                1
+              </span>
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Chat Box Drawer */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 30 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.85, y: 30 }}
+            transition={{ type: "spring", stiffness: 350, damping: 28 }}
+            className="fixed bottom-24 right-6 w-96 max-w-[calc(100vw-2rem)] h-[540px] max-h-[calc(100vh-8rem)] rounded-2xl border border-border bg-card/95 backdrop-blur-md shadow-2xl flex flex-col z-50 overflow-hidden"
+          >
+            {/* Header */}
+            <div className="bg-gradient-to-r from-violet-950/20 via-primary/15 to-transparent border-b border-border/80 p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="relative flex h-9.5 w-9.5 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-500 to-primary text-white shadow-inner">
+                  <Bot className="h-5.5 w-5.5" />
+                  <span className="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-card animate-pulse" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    Asisten AI RoketDev
+                    <Sparkles className="h-3 w-3 text-indigo-400 fill-indigo-400 animate-pulse" />
+                  </h3>
+                  <p className="text-[10px] font-semibold text-muted-foreground">Gemini 3.5 • Online</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-1 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-all focus:outline-none"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Chat Body & Scroll Area */}
+            <div 
+              className="flex-1 overflow-y-auto p-4 space-y-4 text-xs scrollbar-thin scrollbar-thumb-border"
+              onClick={handleMessageContainerClick}
+            >
+              {messages.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`flex ${
+                    msg.role === "user" ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  <div
+                    className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 leading-relaxed shadow-sm ${
+                      msg.role === "user"
+                        ? "bg-primary text-primary-foreground rounded-tr-none font-medium"
+                        : "bg-secondary/70 border border-border text-foreground rounded-tl-none"
+                    }`}
+                    dangerouslySetInnerHTML={{
+                      __html: formatMessageText(msg.content),
+                    }}
+                  />
+                </div>
+              ))}
+
+              {/* Typing Indicator */}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-secondary/70 border border-border text-muted-foreground rounded-2xl rounded-tl-none px-4 py-3 shadow-sm flex items-center gap-1.5">
+                    <Bot className="h-3.5 w-3.5 animate-pulse text-primary" />
+                    <span className="text-[10px] font-medium mr-1">RoketDev sedang mengetik</span>
+                    <span className="flex gap-1 items-center">
+                      <span className="h-1.5 w-1.5 bg-muted-foreground/60 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></span>
+                      <span className="h-1.5 w-1.5 bg-muted-foreground/60 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></span>
+                      <span className="h-1.5 w-1.5 bg-muted-foreground/60 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></span>
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Recommendation Suggestion Chips */}
+              {messages.length === 1 && !isLoading && (
+                <div className="pt-2 space-y-1.5 animate-fade-in">
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider pl-1">
+                    Coba ketik atau klik contoh ini:
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {suggestionChips.map((chip, i) => (
+                      <button
+                        key={i}
+                        onClick={() => handleSend(chip.query)}
+                        className="text-[10px] font-semibold px-2.5 py-1.5 rounded-lg border border-border bg-card hover:bg-secondary hover:border-primary/30 text-foreground transition-all cursor-pointer text-left"
+                      >
+                        {chip.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input Footer Form */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSend(input);
+              }}
+              className="p-3 border-t border-border bg-secondary/20 flex items-center gap-2"
+            >
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="Tanya devtool, template, atau workspace..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                disabled={isLoading}
+                className="flex-1 bg-card border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-xl py-2 px-3 text-xs focus:outline-none placeholder:text-muted-foreground/50 text-foreground disabled:opacity-50"
+              />
+              <button
+                type="submit"
+                disabled={!input.trim() || isLoading}
+                className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-primary-foreground hover:bg-primary/95 disabled:bg-muted disabled:text-muted-foreground transition-all shrink-0 focus:outline-none"
+              >
+                <Send className="h-3.5 w-3.5" />
+              </button>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
