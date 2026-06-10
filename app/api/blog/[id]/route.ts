@@ -46,17 +46,21 @@ export async function PUT(
       return NextResponse.json({ success: false, error: "User profile not found in database" }, { status: 404 });
     }
 
+    if (dbUser.role !== "admin") {
+      return NextResponse.json({ success: false, error: "Forbidden: Admins only" }, { status: 403 });
+    }
+
     const body = await req.json();
     const { title, excerpt, content, coverImageUrl, categorySlug, status, tags } = body;
 
-    // Check if post exists and belongs to the user
+    // Check if post exists
     const existingPost = await db.query.blogPosts.findFirst({
-      where: and(eq(blogPosts.id, id), eq(blogPosts.authorId, dbUser.id)),
+      where: eq(blogPosts.id, id),
     });
 
     if (!existingPost) {
       return NextResponse.json(
-        { success: false, error: "Post not found or you are not authorized to edit this post" },
+        { success: false, error: "Post not found" },
         { status: 404 }
       );
     }
@@ -124,15 +128,19 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: "User profile not found in database" }, { status: 404 });
     }
 
-    // Delete matching post (verifies ownership)
+    if (dbUser.role !== "admin") {
+      return NextResponse.json({ success: false, error: "Forbidden: Admins only" }, { status: 403 });
+    }
+
+    // Delete matching post
     const result = await db
       .delete(blogPosts)
-      .where(and(eq(blogPosts.id, id), eq(blogPosts.authorId, dbUser.id)))
+      .where(eq(blogPosts.id, id))
       .returning();
 
     if (result.length === 0) {
       return NextResponse.json(
-        { success: false, error: "Post not found or you are not authorized to delete this post" },
+        { success: false, error: "Post not found" },
         { status: 404 }
       );
     }

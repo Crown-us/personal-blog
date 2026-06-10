@@ -56,6 +56,10 @@ export async function POST(req: NextRequest) {
       dbUser = newUser;
     }
 
+    if (dbUser.role !== "admin") {
+      return NextResponse.json({ success: false, error: "Forbidden: Admins only" }, { status: 403 });
+    }
+
     const body = await req.json();
     const { title, excerpt, content, coverImageUrl, categorySlug, status, tags } = body;
 

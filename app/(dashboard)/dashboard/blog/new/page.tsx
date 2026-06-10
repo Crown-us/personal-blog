@@ -20,6 +20,26 @@ export default function CreateTutorialPage() {
   const { t, language } = useLanguage();
   const router = useRouter();
 
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/dashboard")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setUserRole(data.role);
+          if (data.role !== "admin") {
+            router.push("/dashboard");
+          }
+        } else {
+          router.push("/login");
+        }
+      })
+      .catch(() => router.push("/login"))
+      .finally(() => setIsAuthLoading(false));
+  }, [router]);
+
   // Form states
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
@@ -146,9 +166,9 @@ export default function CreateTutorialPage() {
           : t({ id: "Draf tutorial berhasil disimpan!", en: "Tutorial draft was saved successfully!" })
       );
 
-      // Redirect back to dashboard after brief delay
+      // Redirect back to admin after brief delay
       setTimeout(() => {
-        router.push("/dashboard");
+        router.push("/admin");
       }, 1500);
     } catch (err: any) {
       setErrorMessage(err.message || t({ id: "Terjadi kesalahan.", en: "An error occurred." }));
@@ -156,6 +176,25 @@ export default function CreateTutorialPage() {
       setIsSubmitting(false);
     }
   };
+
+  if (isAuthLoading) {
+    return (
+      <PageWrapper>
+        <div className="flex-1 flex items-center justify-center min-h-[50vh]">
+          <div className="text-center space-y-3">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="text-xs text-muted-foreground font-semibold">
+              {t({ id: "Memverifikasi hak akses admin...", en: "Verifying admin access..." })}
+            </p>
+          </div>
+        </div>
+      </PageWrapper>
+    );
+  }
+
+  if (userRole !== "admin") {
+    return null;
+  }
 
   return (
     <PageWrapper>
@@ -165,7 +204,7 @@ export default function CreateTutorialPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-border/80 pb-4 gap-4">
           <div className="flex items-center gap-3">
             <Link
-              href="/dashboard"
+              href="/admin"
               className="p-2 border border-border hover:bg-secondary rounded-xl text-muted-foreground hover:text-foreground transition-all"
             >
               <ArrowLeft className="h-4 w-4" />
