@@ -143,28 +143,35 @@ export default function AdminDashboard() {
   }, [affiliateEvents, language]);
 
   const clicksByDay30 = React.useMemo(() => {
-    const days: Record<string, number> = {};
+    const dayList: { date: string; dayNum: number; clicks: number }[] = [];
+    const dateToIdxMap: Record<string, number> = {};
+
     for (let i = 29; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       const dateString = d.toLocaleDateString(language === "id" ? "id-ID" : "en-US", { month: "short", day: "numeric" });
-      days[dateString] = 0;
+      const dayNum = d.getDate();
+
+      dayList.push({
+        date: dateString,
+        dayNum: dayNum,
+        clicks: 0,
+      });
+      dateToIdxMap[dateString] = 29 - i;
     }
     
     affiliateEvents.forEach((ev: any) => {
       const dateString = new Date(ev.createdAt).toLocaleDateString(language === "id" ? "id-ID" : "en-US", { month: "short", day: "numeric" });
-      if (days[dateString] !== undefined) {
-        days[dateString] += 1;
+      if (dateToIdxMap[dateString] !== undefined) {
+        dayList[dateToIdxMap[dateString]].clicks += 1;
       }
     });
     
-    return Object.entries(days).map(([date, count]) => {
-      const dayNum = new Date(date).getDate();
-      // Generate some nice-looking mock page view data based on actual clicks so the line looks organic
-      const pageViews = count * 2 + Math.abs(Math.sin(dayNum) * 12) + 5;
+    return dayList.map((item) => {
+      const pageViews = item.clicks * 2 + Math.abs(Math.sin(item.dayNum) * 12) + 5;
       return { 
-        date, 
-        clicks: count,
+        date: item.date, 
+        clicks: item.clicks,
         views: Math.round(pageViews)
       };
     });
