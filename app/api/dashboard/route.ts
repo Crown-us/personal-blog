@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { extensions, users, blogPosts, analyticsEvents } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, inArray } from "drizzle-orm";
 import { getUser } from "@/lib/auth/supabase";
 
 export async function GET(req: NextRequest) {
@@ -70,6 +70,7 @@ export async function GET(req: NextRequest) {
           })
           .from(analyticsEvents)
           .leftJoin(extensions, eq(analyticsEvents.extensionId, extensions.id))
+          .where(inArray(analyticsEvents.eventType, ["click_install", "click_affiliate"]))
           .orderBy(desc(analyticsEvents.createdAt));
       } catch (err) {
         console.error("Error fetching analytics events for admin:", err);

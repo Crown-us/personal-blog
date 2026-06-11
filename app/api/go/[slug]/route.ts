@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { extensions, analyticsEvents } from "@/lib/db/schema";
+import { extensions, analyticsEvents, users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { createSupabaseServerClient } from "@/lib/auth/supabase";
 
@@ -48,7 +48,7 @@ export async function GET(
       if (user) {
         // Find user by email in database
         const dbUser = await db.query.users.findFirst({
-          where: eq(extensions.publisherId, user.id), // placeholder, let's just query users email
+          where: eq(users.id, user.id),
         });
         // We can just use the user ID directly if it maps to auth.users or db users
         loggedInUserId = user.id;
