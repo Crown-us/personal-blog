@@ -75,6 +75,20 @@ export default function AdminDashboard() {
     category: "",
     screenshots: ""
   });
+  const [extModalOpen, setExtModalOpen] = useState(false);
+  const [editingExt, setEditingExt] = useState<any | null>(null);
+  const [extForm, setExtForm] = useState({
+    name: "",
+    tagline: "",
+    description: "",
+    logoUrl: "",
+    websiteUrl: "",
+    affiliateUrl: "",
+    chromeStoreUrl: "",
+    pricingType: "free",
+    price: "",
+    status: "pending"
+  });
   const [isMounted, setIsMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState<string | null>(null);
@@ -449,6 +463,58 @@ export default function AdminDashboard() {
       } finally {
         setIsActionLoading(null);
       }
+    }
+  };
+
+  const handleOpenEditExt = (ext: any) => {
+    setEditingExt(ext);
+    setExtForm({
+      name: ext.name || "",
+      tagline: ext.tagline || "",
+      description: ext.description || "",
+      logoUrl: ext.logoUrl || "",
+      websiteUrl: ext.websiteUrl || "",
+      affiliateUrl: ext.affiliateUrl || "",
+      chromeStoreUrl: ext.chromeStoreUrl || "",
+      pricingType: ext.pricingType || "free",
+      price: ext.price || "",
+      status: ext.status || "pending"
+    });
+    setExtModalOpen(true);
+  };
+
+  const handleSaveExt = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsActionLoading("save-ext");
+    try {
+      const res = await fetch(`/api/extensions/${editingExt.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: extForm.name,
+          tagline: extForm.tagline,
+          description: extForm.description,
+          logoUrl: extForm.logoUrl,
+          websiteUrl: extForm.websiteUrl,
+          affiliateUrl: extForm.affiliateUrl,
+          chromeStoreUrl: extForm.chromeStoreUrl,
+          pricingType: extForm.pricingType,
+          price: extForm.price,
+          status: extForm.status
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setDbExtensions(dbExtensions.map((item) => item.id === editingExt.id ? data.extension : item));
+        setExtModalOpen(false);
+      } else {
+        alert(data.error || "Failed to save extension details.");
+      }
+    } catch (err) {
+      console.error("Error saving extension:", err);
+      alert("An unexpected error occurred while saving.");
+    } finally {
+      setIsActionLoading(null);
     }
   };
 
@@ -834,6 +900,12 @@ export default function AdminDashboard() {
                                       Unfeature
                                     </button>
                                   )}
+                                  <button
+                                    onClick={() => handleOpenEditExt(ext)}
+                                    className="px-2 py-1 rounded bg-blue-500 hover:bg-blue-600 text-white font-semibold text-[10px] transition-all cursor-pointer"
+                                  >
+                                    Edit
+                                  </button>
                                 </div>
                               </td>
                               <td className="p-4 text-right">
@@ -1671,6 +1743,168 @@ export default function AdminDashboard() {
                         className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/95 font-semibold transition-all shadow-md shadow-primary/20 disabled:opacity-50"
                       >
                         {isActionLoading === "save-sc" 
+                          ? t({ id: "Menyimpan...", en: "Saving..." }) 
+                          : t({ id: "Simpan", en: "Save" })
+                        }
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+
+            {/* Modal Form for DevTools (Extensions) Edit */}
+            {extModalOpen && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-fade-in">
+                <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-border bg-card p-6 shadow-2xl space-y-6">
+                  <div className="flex justify-between items-center pb-4 border-b border-border/60">
+                    <h3 className="text-lg font-bold text-foreground">
+                      {t({ id: "Edit DevTool & Deal", en: "Edit DevTool & Deal" })}
+                    </h3>
+                    <button 
+                      onClick={() => setExtModalOpen(false)}
+                      className="text-muted-foreground hover:text-foreground text-xs font-semibold px-2 py-1 rounded-lg border border-border bg-secondary/20"
+                    >
+                      Close
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleSaveExt} className="space-y-4 text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="font-bold text-foreground">{t({ id: "Nama Produk", en: "Product Name" })} *</label>
+                        <input
+                          type="text"
+                          required
+                          value={extForm.name}
+                          onChange={(e) => setExtForm({ ...extForm, name: e.target.value })}
+                          className="w-full rounded-xl border border-border bg-secondary/20 p-2.5 text-foreground focus:outline-none focus:border-primary"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="font-bold text-foreground">{t({ id: "Pricing Type", en: "Pricing Type" })} *</label>
+                        <select
+                          value={extForm.pricingType}
+                          onChange={(e) => setExtForm({ ...extForm, pricingType: e.target.value })}
+                          className="w-full rounded-xl border border-border bg-secondary/20 p-2.5 text-foreground focus:outline-none focus:border-primary"
+                        >
+                          <option value="free">Free</option>
+                          <option value="freemium">Freemium</option>
+                          <option value="paid">Paid</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="font-bold text-foreground">{t({ id: "Tagline", en: "Tagline" })}</label>
+                        <input
+                          type="text"
+                          value={extForm.tagline}
+                          onChange={(e) => setExtForm({ ...extForm, tagline: e.target.value })}
+                          className="w-full rounded-xl border border-border bg-secondary/20 p-2.5 text-foreground focus:outline-none focus:border-primary"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="font-bold text-foreground">{t({ id: "Harga Per Bulan ($)", en: "Price Per Month ($)" })}</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          placeholder="e.g. 9.99"
+                          value={extForm.price}
+                          onChange={(e) => setExtForm({ ...extForm, price: e.target.value })}
+                          className="w-full rounded-xl border border-border bg-secondary/20 p-2.5 text-foreground focus:outline-none focus:border-primary"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-bold text-foreground">{t({ id: "Deskripsi", en: "Description" })} *</label>
+                      <textarea
+                        required
+                        rows={4}
+                        value={extForm.description}
+                        onChange={(e) => setExtForm({ ...extForm, description: e.target.value })}
+                        className="w-full rounded-xl border border-border bg-secondary/20 p-2.5 text-foreground focus:outline-none focus:border-primary font-mono text-[11px]"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="font-bold text-foreground">{t({ id: "Link Kemitraan / Affiliate Url (Deals)", en: "Partner / Affiliate Url (Deals)" })}</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. https://chatgptsidebar.io/ref=roketdev"
+                          value={extForm.affiliateUrl}
+                          onChange={(e) => setExtForm({ ...extForm, affiliateUrl: e.target.value })}
+                          className="w-full rounded-xl border border-border bg-secondary/20 p-2.5 text-foreground focus:outline-none focus:border-primary border-primary/40 focus:ring-1 focus:ring-primary"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="font-bold text-foreground">{t({ id: "Website Url Resmi", en: "Official Website Url" })}</label>
+                        <input
+                          type="text"
+                          value={extForm.websiteUrl}
+                          onChange={(e) => setExtForm({ ...extForm, websiteUrl: e.target.value })}
+                          className="w-full rounded-xl border border-border bg-secondary/20 p-2.5 text-foreground focus:outline-none focus:border-primary"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="font-bold text-foreground">{t({ id: "Chrome Web Store Url", en: "Chrome Web Store Url" })} *</label>
+                        <input
+                          type="text"
+                          required
+                          value={extForm.chromeStoreUrl}
+                          onChange={(e) => setExtForm({ ...extForm, chromeStoreUrl: e.target.value })}
+                          className="w-full rounded-xl border border-border bg-secondary/20 p-2.5 text-foreground focus:outline-none focus:border-primary"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="font-bold text-foreground">{t({ id: "Logo Url / Emoji", en: "Logo Url / Emoji" })}</label>
+                        <input
+                          type="text"
+                          value={extForm.logoUrl}
+                          onChange={(e) => setExtForm({ ...extForm, logoUrl: e.target.value })}
+                          className="w-full rounded-xl border border-border bg-secondary/20 p-2.5 text-foreground focus:outline-none focus:border-primary"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-bold text-foreground">{t({ id: "Status Moderasi", en: "Moderation Status" })} *</label>
+                      <select
+                        value={extForm.status}
+                        onChange={(e) => setExtForm({ ...extForm, status: e.target.value })}
+                        className="w-full rounded-xl border border-border bg-secondary/20 p-2.5 text-foreground focus:outline-none focus:border-primary font-bold text-primary"
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="featured">Featured (Approved & Highlighted)</option>
+                      </select>
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-4 border-t border-border/60">
+                      <button
+                        type="button"
+                        onClick={() => setExtModalOpen(false)}
+                        className="px-4 py-2.5 rounded-xl border border-border text-foreground hover:bg-secondary/40 font-semibold transition-all"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isActionLoading === "save-ext"}
+                        className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/95 font-semibold transition-all shadow-md shadow-primary/20 disabled:opacity-50"
+                      >
+                        {isActionLoading === "save-ext" 
                           ? t({ id: "Menyimpan...", en: "Saving..." }) 
                           : t({ id: "Simpan", en: "Save" })
                         }

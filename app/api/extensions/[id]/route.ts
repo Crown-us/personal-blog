@@ -39,7 +39,20 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 
     const body = await req.json();
-    const { status, isFeatured, isSponsored } = body;
+    const { 
+      status, 
+      isFeatured, 
+      isSponsored,
+      name,
+      tagline,
+      description,
+      logoUrl,
+      websiteUrl,
+      affiliateUrl,
+      chromeStoreUrl,
+      pricingType,
+      price
+    } = body;
 
     const updateData: any = {};
     
@@ -48,6 +61,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       if (status !== undefined) updateData.status = status;
       if (isFeatured !== undefined) updateData.isFeatured = isFeatured;
       if (isSponsored !== undefined) updateData.isSponsored = isSponsored;
+      if (name !== undefined) updateData.name = name;
+      if (tagline !== undefined) updateData.tagline = tagline;
+      if (description !== undefined) updateData.description = description;
+      if (logoUrl !== undefined) updateData.logoUrl = logoUrl;
+      if (websiteUrl !== undefined) updateData.websiteUrl = websiteUrl;
+      if (affiliateUrl !== undefined) updateData.affiliateUrl = affiliateUrl;
+      if (chromeStoreUrl !== undefined) updateData.chromeStoreUrl = chromeStoreUrl;
+      if (pricingType !== undefined) updateData.pricingType = pricingType;
+      if (price !== undefined) updateData.price = price;
     } else {
       return NextResponse.json({ success: false, error: "Only admin can audit submissions" }, { status: 403 });
     }
