@@ -46,6 +46,7 @@ export default function Navbar() {
       case "Bundles": return dict["nav.bundles"];
       case "Showcase": return dict["nav.showcase"];
       case "Tutorials": return dict["nav.blog"];
+      case "Deals": return dict["nav.deals"];
       default: return label;
     }
   };

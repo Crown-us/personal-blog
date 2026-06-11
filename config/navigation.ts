@@ -5,6 +5,7 @@ export const navigation = {
     { label: "Bundles", href: "/bundles" },
     { label: "Showcase", href: "/showcase" },
     { label: "Tutorials", href: "/blog" },
+    { label: "Deals", href: "/deals" },
   ],
   footer: {
     product: [
