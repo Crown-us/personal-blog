@@ -133,8 +133,8 @@ export default function PublisherDashboard() {
             </div>
             
             {[
-              { id: "bookmarks", label: t({ id: "🔖 Bookmark Saya", en: "🔖 My Bookmarks" }), icon: Bookmark },
-              { id: "extensions", label: t({ id: "🧩 Usulan DevTool Saya", en: "🧩 My Proposed Tools" }), icon: Settings }
+              { id: "bookmarks", label: t({ id: "Bookmark Saya", en: "My Bookmarks" }), icon: Bookmark },
+              { id: "extensions", label: t({ id: "Usulan DevTool Saya", en: "My Proposed Tools" }), icon: Settings }
             ].map((tab) => {
               const Icon = tab.icon;
               return (
@@ -162,7 +162,7 @@ export default function PublisherDashboard() {
                   className="w-full text-left text-xs font-semibold py-2.5 px-3 rounded-xl transition-all flex items-center gap-2 text-amber-500 hover:bg-amber-500/5 border border-amber-500/20 bg-amber-500/5 font-bold"
                 >
                   <Settings className="h-4 w-4" />
-                  {t({ id: "⚙️ Panel Kontrol Admin", en: "⚙️ Admin Control Panel" })}
+                  {t({ id: "Panel Kontrol Admin", en: "Admin Control Panel" })}
                 </Link>
               </>
             )}

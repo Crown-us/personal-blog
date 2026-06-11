@@ -5,14 +5,17 @@ import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { useLanguage } from "@/components/LanguageProvider";
 import { Rocket, Mail, Send, CheckCircle2 } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
+  const pathname = usePathname();
   const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "success">("idle");
   const [visitorCount, setVisitorCount] = useState<number | null>(null);
 
   useEffect(() => {
+    if (pathname?.startsWith("/admin")) return;
     const hasVisitedSession = sessionStorage.getItem("has_visited_session");
     const method = hasVisitedSession ? "GET" : "POST";
 
@@ -31,7 +34,9 @@ export default function Footer() {
         }
       })
       .catch((err) => console.error("Failed to load visitor stats:", err));
-  }, []);
+  }, [pathname]);
+
+  if (pathname?.startsWith("/admin")) return null;
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();

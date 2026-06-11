@@ -224,7 +224,7 @@ export default function BlogPostDetail({ params }: { params: Promise<{ slug: str
                   </div>
 
                   <a
-                    href={embeddedExtension.affiliateUrl || embeddedExtension.chromeStoreUrl}
+                    href={`/api/go/${embeddedExtension.slug}?type=affiliate`}
                     target="_blank"
                     rel="noreferrer"
                     className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/95 transition-all shrink-0 flex items-center gap-1"

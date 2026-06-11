@@ -493,7 +493,7 @@ export default function ExtensionDetail({ params }: { params: Promise<{ slug: st
             </div>
             
             <a
-              href={extension.affiliateUrl || extension.chromeStoreUrl}
+              href={`/api/go/${extension.slug}?type=install`}
               target="_blank"
               rel="noreferrer"
               className="flex items-center justify-center gap-2 w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/95 transition-all shadow-md shadow-primary/20"

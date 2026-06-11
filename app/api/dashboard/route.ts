@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { extensions, users, blogPosts } from "@/lib/db/schema";
+import { extensions, users, blogPosts, analyticsEvents } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { getUser } from "@/lib/auth/supabase";
 
@@ -52,6 +52,30 @@ export async function GET(req: NextRequest) {
         .orderBy(desc(blogPosts.createdAt));
     }
 
+    // 3. Get affiliate click events (Admin only)
+    let affiliateEvents: any[] = [];
+    if (isAdmin) {
+      try {
+        affiliateEvents = await db
+          .select({
+            id: analyticsEvents.id,
+            createdAt: analyticsEvents.createdAt,
+            eventType: analyticsEvents.eventType,
+            countryCode: analyticsEvents.countryCode,
+            extensionId: extensions.id,
+            extensionName: extensions.name,
+            extensionLogo: extensions.logoUrl,
+            extensionSlug: extensions.slug,
+            affiliateUrl: extensions.affiliateUrl,
+          })
+          .from(analyticsEvents)
+          .leftJoin(extensions, eq(analyticsEvents.extensionId, extensions.id))
+          .orderBy(desc(analyticsEvents.createdAt));
+      } catch (err) {
+        console.error("Error fetching analytics events for admin:", err);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       role: dbUser.role,
@@ -64,6 +88,7 @@ export async function GET(req: NextRequest) {
       },
       extensions: userExtensions,
       blogPosts: userBlogs,
+      affiliateEvents: affiliateEvents,
     });
   } catch (error: any) {
     console.error("Failed to load dashboard data:", error);

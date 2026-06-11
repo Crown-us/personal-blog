@@ -19,7 +19,6 @@ import {
 import { navigation } from "@/config/navigation";
 import { useLanguage } from "@/components/LanguageProvider";
 import { motion, AnimatePresence } from "framer-motion";
-
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -28,6 +27,10 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const { language, setLanguage, dict } = useLanguage();
   const [isLangOpen, setIsLangOpen] = useState(false);
+
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();

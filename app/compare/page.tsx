@@ -251,7 +251,7 @@ function ComparisonContent() {
                         {/* Installation Link CTA */}
                         <div className="pt-6 border-t border-border/60">
                           <a
-                            href={ext.affiliateUrl || ext.chromeStoreUrl}
+                            href={`/api/go/${ext.slug}?type=install`}
                             target="_blank"
                             rel="noreferrer"
                             className="flex items-center justify-center gap-2 w-full rounded-xl bg-primary py-2.5 text-xs font-semibold text-primary-foreground hover:bg-primary/95 transition-all shadow-sm"
