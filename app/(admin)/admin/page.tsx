@@ -516,8 +516,8 @@ export default function AdminDashboard() {
   }
 
   // Metrics calculation
-  const totalClicks = dbExtensions.reduce((acc, curr) => acc + (curr.clickCount || 0), 0);
-  const totalInstalls = dbExtensions.reduce((acc, curr) => acc + (curr.totalInstalls || 0), 0);
+  const totalClicks = affiliateEvents.length;
+  const totalInstalls = affiliateEvents.filter((ev: any) => ev.eventType === "click_install").length;
 
   return (
     <PageWrapper>
