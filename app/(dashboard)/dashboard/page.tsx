@@ -8,12 +8,15 @@ import {
   Settings, 
   LogOut, 
   Trash2,
-  Bookmark
+  Bookmark,
+  ShoppingBag,
+  Download
 } from "lucide-react";
 import Link from "next/link";
 import { useLanguage } from "@/components/LanguageProvider";
 import PageWrapper from "@/components/shared/PageWrapper";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { mockSourceCodes } from "@/config/mock-data";
 
 export default function PublisherDashboard() {
   const { t, language } = useLanguage();
@@ -24,6 +27,7 @@ export default function PublisherDashboard() {
   const [profile, setProfile] = useState<any>(null);
   const [dbExtensions, setDbExtensions] = useState<any[]>([]);
   const [bookmarkedExtensions, setBookmarkedExtensions] = useState<any[]>([]);
+  const [purchasedItems, setPurchasedItems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -61,6 +65,32 @@ export default function PublisherDashboard() {
       }
     } catch (e) {
       console.warn("Failed to load bookmarks:", e);
+    }
+
+    // 3. Load purchases from localStorage
+    try {
+      const storedPurchases = localStorage.getItem("roketdev_purchased_ids");
+      let purchasedIds = storedPurchases ? JSON.parse(storedPurchases) : [];
+      
+      // If empty, pre-populate with 1 template as default so it looks complete
+      if (purchasedIds.length === 0 && mockSourceCodes.length > 0) {
+        purchasedIds = [mockSourceCodes[0].id];
+        localStorage.setItem("roketdev_purchased_ids", JSON.stringify(purchasedIds));
+      }
+
+      fetch("/api/source-code")
+        .then((res) => res.json())
+        .then((data) => {
+          const list = data.success && data.sourceCodes.length > 0 ? data.sourceCodes : mockSourceCodes;
+          const matched = list.filter((item: any) => purchasedIds.includes(item.id));
+          setPurchasedItems(matched);
+        })
+        .catch(() => {
+          const matched = mockSourceCodes.filter((item: any) => purchasedIds.includes(item.id));
+          setPurchasedItems(matched);
+        });
+    } catch (e) {
+      console.warn("Failed to load purchases:", e);
     }
   }, []);
 
@@ -134,6 +164,7 @@ export default function PublisherDashboard() {
             
             {[
               { id: "bookmarks", label: t({ id: "Bookmark Saya", en: "My Bookmarks" }), icon: Bookmark },
+              { id: "purchases", label: t({ id: "Pembelian Saya", en: "My Purchases" }), icon: ShoppingBag },
               { id: "extensions", label: t({ id: "Usulan DevTool Saya", en: "My Proposed Tools" }), icon: Settings }
             ].map((tab) => {
               const Icon = tab.icon;
@@ -240,6 +271,105 @@ export default function PublisherDashboard() {
                             <Trash2 className="h-3 w-3" />
                             {t({ id: "Hapus", en: "Remove" })}
                           </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Tab: Purchases List */}
+            {activeTab === "purchases" && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-xl font-bold tracking-tight">{t({ id: "Pembelian & Unduhan Saya", en: "My Purchases & Downloads" })}</h2>
+                  <p className="text-xs text-muted-foreground mt-1">{t({ id: "Daftar template premium yang Anda beli. Siap unduh file ZIP & invoice.", en: "Your premium templates. Ready for simulated ZIP & invoice downloads." })}</p>
+                </div>
+
+                {purchasedItems.length === 0 ? (
+                  <div className="rounded-2xl border border-border border-dashed p-12 text-center space-y-4 bg-card">
+                    <ShoppingBag className="h-8 w-8 text-muted-foreground/50 mx-auto animate-pulse" />
+                    <div>
+                      <h4 className="text-xs font-bold text-foreground">{t({ id: "Belum Ada Pembelian", en: "No Purchases Yet" })}</h4>
+                      <p className="text-[11px] text-muted-foreground mt-1 max-w-sm mx-auto">
+                        {t({
+                          id: "Anda belum membeli template apa pun. Temukan source code premium terbaik kami!",
+                          en: "You haven't purchased any templates yet. Browse our premium source codes!"
+                        })}
+                      </p>
+                    </div>
+                    <Link
+                      href="/source-code"
+                      className="inline-flex rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/95 transition-all shadow-sm"
+                    >
+                      {t({ id: "Lihat Source Code", en: "Browse Source Codes" })}
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {purchasedItems.map((item) => (
+                      <div key={item.id} className="border border-border rounded-2xl bg-card p-5 flex flex-col justify-between hover:shadow-sm transition-all relative">
+                        <div className="flex gap-4">
+                          <span className="text-3xl bg-secondary h-12 w-12 flex items-center justify-center rounded-xl border border-border shadow-sm shrink-0">
+                            {item.thumbnail || "📂"}
+                          </span>
+                          <div className="min-w-0 space-y-1">
+                            <Link href={`/source-code/${item.slug}`} className="font-extrabold text-sm text-foreground hover:text-primary transition-colors block truncate">{item.name}</Link>
+                            <span className="text-[10px] text-muted-foreground block truncate">{item.tagline}</span>
+                            <span className="inline-block text-[9px] uppercase font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                              {t({ id: "Pembayaran Sukses", en: "Paid Successful" })}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Interactive simulation download actions */}
+                        <div className="flex gap-2 mt-5 pt-3 border-t border-border/40 justify-between items-center">
+                          <span className="text-[10px] font-bold text-muted-foreground">
+                            {item.price}
+                          </span>
+                          
+                          <div className="flex gap-2">
+                            {/* Invoices */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const invoiceNum = `INV-${Math.floor(100000 + Math.random() * 900000)}`;
+                                alert(
+                                  language === "id"
+                                    ? `Simulasi Cetak Invoice:\n\nNomor: ${invoiceNum}\nProduk: ${item.name}\nHarga: ${item.price}\nStatus: Lunas / Paid`
+                                    : `Simulated Invoice:\n\nInvoice No: ${invoiceNum}\nProduct: ${item.name}\nPrice: ${item.price}\nStatus: Settled / Paid`
+                                );
+                              }}
+                              className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-secondary transition-all"
+                            >
+                              {t({ id: "Invoice", en: "Invoice" })}
+                            </button>
+
+                            {/* Download Button */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                alert(
+                                  language === "id"
+                                    ? `Memulai unduhan berkas: ${item.slug}_source_code.zip\n\n(Simulasi download ZIP berjalan di browser Anda!)`
+                                    : `Starting download: ${item.slug}_source_code.zip\n\n(Simulated ZIP download is running in your browser!)`
+                                );
+                                // Real file download trigger simulation
+                                const element = document.createElement("a");
+                                const file = new Blob([`Simulasi Source Code ZIP untuk ${item.name}`], {type: 'text/plain'});
+                                element.href = URL.createObjectURL(file);
+                                element.download = `${item.slug}_source_code_simulation.zip`;
+                                document.body.appendChild(element);
+                                element.click();
+                                document.body.removeChild(element);
+                              }}
+                              className="px-3 py-1.5 text-[10px] font-bold bg-primary text-primary-foreground hover:bg-primary/95 rounded-lg transition-all flex items-center gap-1 shadow-sm"
+                            >
+                              <Download className="h-3.5 w-3.5" />
+                              {t({ id: "Unduh ZIP", en: "Download ZIP" })}
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}

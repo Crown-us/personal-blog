@@ -157,7 +157,19 @@ export default function SourceCodeDetail({ params }: { params: Promise<{ slug: s
                 {t({ id: "Hubungi via WhatsApp", en: "Buy via WhatsApp" })}
               </a>
               <button
-                onClick={() => setPurchaseSuccess(true)}
+                onClick={() => {
+                  setPurchaseSuccess(true);
+                  try {
+                    const saved = localStorage.getItem("roketdev_purchased_ids");
+                    const list = saved ? JSON.parse(saved) : [];
+                    if (!list.includes(product.id)) {
+                      list.push(product.id);
+                      localStorage.setItem("roketdev_purchased_ids", JSON.stringify(list));
+                    }
+                  } catch (e) {
+                    console.error("Failed to save purchase:", e);
+                  }
+                }}
                 className="flex items-center justify-center gap-2 w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/95 transition-all shadow-md shadow-primary/20"
               >
                 <CreditCard className="h-4 w-4" />
