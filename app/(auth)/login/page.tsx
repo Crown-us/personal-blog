@@ -60,6 +60,9 @@ function LoginContent() {
         provider: "google",
         options: {
           redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
+          queryParams: {
+            prompt: "select_account",
+          },
         },
       });
 
@@ -69,6 +72,63 @@ function LoginContent() {
     } catch (err: any) {
       setErrorMsg(err.message || t({ id: "Gagal menghubungkan ke Google.", en: "Failed to connect to Google." }));
       setOauthLoading(false);
+    }
+  };
+
+  // Handle Quick Demo Login
+  const handleQuickLogin = async (selectedEmail: string) => {
+    setErrorMsg("");
+    setLoading(true);
+    const demoPassword = "Password123!";
+    
+    setEmail(selectedEmail);
+    setPassword(demoPassword);
+
+    try {
+      // 1. Try to sign in
+      let { data, error } = await supabase.auth.signInWithPassword({
+        email: selectedEmail,
+        password: demoPassword,
+      });
+
+      // 2. If it fails because user does not exist in Supabase Auth, let's sign them up!
+      if (error && error.message.toLowerCase().includes("invalid login credentials")) {
+        const signUpResult = await supabase.auth.signUp({
+          email: selectedEmail,
+          password: demoPassword,
+          options: {
+            data: {
+              full_name: selectedEmail === "admin@roketdev.com" ? "RoketDev Team" : "Demo Developer",
+            }
+          }
+        });
+
+        if (signUpResult.error) {
+          throw signUpResult.error;
+        }
+
+        // Try to sign in again after sign up
+        const retryResult = await supabase.auth.signInWithPassword({
+          email: selectedEmail,
+          password: demoPassword,
+        });
+
+        if (retryResult.error) {
+          throw retryResult.error;
+        }
+        
+        data = retryResult.data;
+        error = null;
+      } else if (error) {
+        throw error;
+      }
+
+      router.push(redirectTo);
+      router.refresh();
+    } catch (err: any) {
+      setErrorMsg(err.message || t({ id: "Gagal masuk. Silakan coba lagi.", en: "Failed to sign in. Please try again." }));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -103,6 +163,36 @@ function LoginContent() {
               <span>{errorMsg}</span>
             </div>
           )}
+
+          {/* Quick Demo Login Section */}
+          <div className="space-y-2.5">
+            <label className="text-[10px] font-bold text-muted-foreground/85 uppercase tracking-wider block text-center">
+              {t({ id: "Pilih Akun Demo / Quick Login", en: "Select Demo Account / Quick Login" })}
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => handleQuickLogin("admin@roketdev.com")}
+                disabled={loading || oauthLoading}
+                className="rounded-2xl border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 p-3 text-left transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+              >
+                <div className="text-[11px] font-extrabold text-amber-500 uppercase tracking-wide">Admin / Publisher</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5 truncate">admin@roketdev.com</div>
+                <div className="text-[9px] text-muted-foreground/60 mt-1 font-mono">Pass: Password123!</div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleQuickLogin("developer@roketdev.com")}
+                disabled={loading || oauthLoading}
+                className="rounded-2xl border border-indigo-500/20 bg-indigo-500/5 hover:bg-indigo-500/10 p-3 text-left transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+              >
+                <div className="text-[11px] font-extrabold text-indigo-400 uppercase tracking-wide">Developer / Buyer</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5 truncate">developer@roketdev.com</div>
+                <div className="text-[9px] text-muted-foreground/60 mt-1 font-mono">Pass: Password123!</div>
+              </button>
+            </div>
+          </div>
 
           {/* Social OAuth Button */}
           <button

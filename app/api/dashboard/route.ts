@@ -11,13 +11,23 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get database user record
-    const dbUser = await db.query.users.findFirst({
+    // Get or create database user record
+    let dbUser = await db.query.users.findFirst({
       where: eq(users.email, user.email!),
     });
 
     if (!dbUser) {
-      return NextResponse.json({ success: false, error: "User profile not found in database" }, { status: 404 });
+      const [newUser] = await db
+        .insert(users)
+        .values({
+          email: user.email!,
+          fullName: user.user_metadata?.full_name || user.email?.split("@")[0] || "User",
+          avatarUrl: user.user_metadata?.avatar_url || null,
+          role: "user",
+          plan: "free",
+        })
+        .returning();
+      dbUser = newUser;
     }
 
     const isAdmin = dbUser.role === "admin";

@@ -32,6 +32,17 @@ async function main() {
         plan: "pro",
       })
       .returning();
+    
+    // Seed Kevin Wijaya as admin
+    await db
+      .insert(users)
+      .values({
+        email: "wijaya.kevinn@gmail.com",
+        fullName: "Kevin Wijaya",
+        role: "admin",
+        plan: "pro",
+      });
+
     console.log(`✅ Admin user created: ${adminUser.fullName} (${adminUser.id})`);
 
     // 3. Seed Categories

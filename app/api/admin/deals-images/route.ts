@@ -2,11 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { getUser } from "@/lib/auth/supabase";
-import { promises as fs } from "fs";
+import { getUser, createSupabaseServerClient } from "@/lib/auth/supabase";
 import path from "path";
 
-// GET: List all files in public/deals
+// GET: List all files in Supabase Storage bucket "deals"
 export async function GET(req: NextRequest) {
   try {
     const currentUser = await getUser();
@@ -23,36 +22,32 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: "Forbidden: Admins only" }, { status: 403 });
     }
 
-    const dirPath = path.join(process.cwd(), "public", "deals");
+    const supabase = await createSupabaseServerClient();
     
-    // Ensure directory exists
-    try {
-      await fs.access(dirPath);
-    } catch {
-      await fs.mkdir(dirPath, { recursive: true });
+    // List files in "deals" bucket
+    const { data: files, error: listError } = await supabase.storage
+      .from("deals")
+      .list("", {
+        limit: 100,
+        sortBy: { column: "created_at", order: "desc" },
+      });
+
+    if (listError) {
+      throw listError;
     }
 
-    const files = await fs.readdir(dirPath);
-    const images = [];
+    const images = (files || []).map((file) => {
+      const { data: { publicUrl } } = supabase.storage
+        .from("deals")
+        .getPublicUrl(file.name);
 
-    for (const file of files) {
-      // Filter out non-image files
-      const ext = path.extname(file).toLowerCase();
-      if ([".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"].includes(ext)) {
-        const filePath = path.join(dirPath, file);
-        const stats = await fs.stat(filePath);
-        
-        images.push({
-          name: file,
-          url: `/deals/${file}`,
-          sizeBytes: stats.size,
-          createdAt: stats.mtime,
-        });
-      }
-    }
-
-    // Sort by most recent
-    images.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      return {
+        name: file.name,
+        url: publicUrl,
+        sizeBytes: file.metadata?.size || 0,
+        createdAt: file.created_at ? new Date(file.created_at) : new Date(),
+      };
+    });
 
     return NextResponse.json({ success: true, images });
   } catch (error: any) {
@@ -61,7 +56,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST: Upload a new image file to public/deals
+// POST: Upload a new image file to Supabase Storage bucket "deals"
 export async function POST(req: NextRequest) {
   try {
     const currentUser = await getUser();
@@ -103,23 +98,31 @@ export async function POST(req: NextRequest) {
       .replace(/(^-|-$)+/g, "");
     
     const fileName = `${nameWithoutExt}-${Date.now()}${ext}`;
-    const dirPath = path.join(process.cwd(), "public", "deals");
-    const filePath = path.join(dirPath, fileName);
 
-    // Ensure directory exists
-    try {
-      await fs.access(dirPath);
-    } catch {
-      await fs.mkdir(dirPath, { recursive: true });
+    const supabase = await createSupabaseServerClient();
+
+    // Upload to Supabase Storage
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from("deals")
+      .upload(fileName, buffer, {
+        contentType: file.type,
+        upsert: true,
+      });
+
+    if (uploadError) {
+      throw uploadError;
     }
 
-    await fs.writeFile(filePath, buffer);
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from("deals")
+      .getPublicUrl(fileName);
 
     return NextResponse.json({
       success: true,
       image: {
         name: fileName,
-        url: `/deals/${fileName}`,
+        url: publicUrl,
         sizeBytes: buffer.length,
       }
     });

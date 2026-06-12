@@ -80,6 +80,9 @@ function RegisterContent() {
         provider: "google",
         options: {
           redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
+          queryParams: {
+            prompt: "select_account",
+          },
         },
       });
 
