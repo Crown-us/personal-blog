@@ -7,15 +7,17 @@ import CompareTray from "@/components/shared/CompareTray";
 import { useCompare } from "@/hooks/useCompare";
 import { mockExtensions, mockSourceCodes, mockBlogPosts } from "@/config/mock-data";
 import { categories } from "@/config/categories";
-import { Search, Bot, Zap, Shield, Code2, PenLine, Sparkles, GraduationCap, Video, Briefcase, BarChart3 } from "lucide-react";
+import { Search, Bot, Zap, Shield, Code2, PenLine, Sparkles, GraduationCap, Video, Briefcase, BarChart3, Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/components/LanguageProvider";
 import PageWrapper from "@/components/shared/PageWrapper";
 import { motion } from "framer-motion";
+import { useWishlist } from "@/hooks/useWishlist";
 
 export default function Home() {
   const router = useRouter();
   const { compareIds, toggleCompare, clearCompare } = useCompare();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const [searchQuery, setSearchQuery] = useState("");
   const { language, t, dict, tExtension, tSourceCode, tBlog } = useLanguage();
 
@@ -312,8 +314,25 @@ export default function Home() {
                       damping: 25,
                       mass: 0.8
                     }}
-                    className="market-card flex flex-col justify-between rounded-xl p-4 transition-colors border border-border bg-card"
+                    className="market-card flex flex-col justify-between rounded-xl p-4 transition-colors border border-border bg-card relative"
                   >
+                    {/* Wishlist Button */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleWishlist(code.id, "source-code");
+                      }}
+                      className={`absolute top-3 right-3 p-1.5 rounded-lg border transition-colors hover:bg-secondary z-10 ${
+                        isInWishlist(code.id, "source-code")
+                          ? "text-rose-500 bg-rose-500/5 border-rose-500/20"
+                          : "text-muted-foreground hover:text-foreground bg-card border-border/80"
+                      }`}
+                      title={isInWishlist(code.id, "source-code") ? t({ id: "Hapus dari Wishlist", en: "Remove from Wishlist" }) : t({ id: "Tambah ke Wishlist", en: "Add to Wishlist" })}
+                    >
+                      <Heart className={`h-3.5 w-3.5 ${isInWishlist(code.id, "source-code") ? "fill-current" : ""}`} />
+                    </button>
                     <div>
                       <div className="flex gap-3">
                         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-secondary/80 border border-border text-2xl font-bold">

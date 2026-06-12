@@ -2,11 +2,12 @@
 
 import React from "react";
 import Link from "next/link";
-import { Star, Download } from "lucide-react";
+import { Star, Download, Heart } from "lucide-react";
 import { ExtensionWithDetails } from "@/types/extension";
 import { formatNumber } from "@/lib/utils";
 import { useLanguage } from "@/components/LanguageProvider";
 import { motion } from "framer-motion";
+import { useWishlist } from "@/hooks/useWishlist";
 
 interface ExtensionCardProps {
   extension: ExtensionWithDetails | any;
@@ -20,6 +21,9 @@ export default function ExtensionCard({
   isComparing 
 }: ExtensionCardProps) {
   const { t } = useLanguage();
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  const isWishlisted = isInWishlist(extension.id, "extension");
+  
   const rating = parseFloat(extension.avgRating?.toString() || "0");
   const publisher = extension.publisherName || t({ id: "Pengembang Terverifikasi", en: "Verified Developer" });
 
@@ -38,8 +42,25 @@ export default function ExtensionCard({
         damping: 25,
         mass: 0.8
       }}
-      className="market-card flex flex-col justify-between rounded-xl p-4 transition-colors border border-border bg-card"
+      className="market-card flex flex-col justify-between rounded-xl p-4 transition-colors border border-border bg-card relative"
     >
+      {/* Wishlist Button */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleWishlist(extension.id, "extension");
+        }}
+        className={`absolute top-3 right-3 p-1.5 rounded-lg border transition-colors hover:bg-secondary z-10 ${
+          isWishlisted
+            ? "text-rose-500 bg-rose-500/5 border-rose-500/20"
+            : "text-muted-foreground hover:text-foreground bg-card border-border/80"
+        }`}
+        title={isWishlisted ? t({ id: "Hapus dari Wishlist", en: "Remove from Wishlist" }) : t({ id: "Tambah ke Wishlist", en: "Add to Wishlist" })}
+      >
+        <Heart className={`h-3.5 w-3.5 ${isWishlisted ? "fill-current" : ""}`} />
+      </button>
       <div>
         {/* Header: Icon + Name & Publisher */}
         <div className="flex gap-3">

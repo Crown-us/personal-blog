@@ -14,7 +14,8 @@ import {
   Search,
   Layers,
   Globe,
-  Rocket
+  Rocket,
+  Heart
 } from "lucide-react";
 import { navigation } from "@/config/navigation";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -118,6 +119,14 @@ export default function Navbar() {
           >
             <Layers className="h-3 w-3" />
             {dict["nav.compare"]}
+          </Link>
+
+          <Link
+            href="/wishlist"
+            className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-border bg-secondary/35 text-foreground hover:bg-secondary transition-all"
+          >
+            <Heart className="h-3.5 w-3.5 text-rose-500" />
+            Wishlist
           </Link>
 
           {/* Language Switcher Dropdown */}
@@ -254,6 +263,14 @@ export default function Navbar() {
                   {getTranslatedLabel(item.label)}
                 </Link>
               ))}
+              <Link
+                href="/wishlist"
+                onClick={() => setIsOpen(false)}
+                className="text-xs font-semibold py-1.5 text-muted-foreground hover:text-foreground flex items-center gap-1.5"
+              >
+                <Heart className="h-3.5 w-3.5 text-rose-500 fill-rose-500/10" />
+                Wishlist
+              </Link>
             </nav>
             
             <hr className="border-border" />

@@ -3,13 +3,15 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { mockSourceCodes } from "@/config/mock-data";
-import { Search, Layers, SlidersHorizontal, RefreshCw, X, ExternalLink } from "lucide-react";
+import { Search, Layers, SlidersHorizontal, RefreshCw, X, ExternalLink, Heart } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
 import PageWrapper from "@/components/shared/PageWrapper";
 import { motion } from "framer-motion";
+import { useWishlist } from "@/hooks/useWishlist";
 
 export default function SourceCodeMarketplace() {
   const { language, t, dict, tSourceCode } = useLanguage();
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   const [sourceCodesList, setSourceCodesList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -209,8 +211,25 @@ export default function SourceCodeMarketplace() {
                     damping: 25,
                     mass: 0.8
                   }}
-                  className="market-card flex flex-col justify-between rounded-xl p-4 transition-colors border border-border bg-card"
+                  className="market-card flex flex-col justify-between rounded-xl p-4 transition-colors border border-border bg-card relative"
                 >
+                  {/* Wishlist Button */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleWishlist(code.id, "source-code");
+                    }}
+                    className={`absolute top-3 right-3 p-1.5 rounded-lg border transition-colors hover:bg-secondary z-10 ${
+                      isInWishlist(code.id, "source-code")
+                        ? "text-rose-500 bg-rose-500/5 border-rose-500/20"
+                        : "text-muted-foreground hover:text-foreground bg-card border-border/80"
+                    }`}
+                    title={isInWishlist(code.id, "source-code") ? t({ id: "Hapus dari Wishlist", en: "Remove from Wishlist" }) : t({ id: "Tambah ke Wishlist", en: "Add to Wishlist" })}
+                  >
+                    <Heart className={`h-3.5 w-3.5 ${isInWishlist(code.id, "source-code") ? "fill-current" : ""}`} />
+                  </button>
                   <div>
                     {/* Header Thumbnail + Info */}
                     <div className="flex gap-3">
