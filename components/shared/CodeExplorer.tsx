@@ -13,11 +13,13 @@ import {
   Terminal, 
   Layers, 
   RefreshCw, 
-  Cpu 
+  Cpu,
+  MessageSquare
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { projectCodeStructures, CodeFile, CodeFolder, CodeNode } from "@/config/code-structures";
 import { useLanguage } from "@/components/LanguageProvider";
+import MarkdownRenderer from "./MarkdownRenderer";
 
 interface CodeExplorerProps {
   slug: string;
@@ -246,45 +248,7 @@ export default function CodeExplorer({ slug }: CodeExplorerProps) {
     }
   };
 
-  // AI text parser for simple markdown formatting (bold, checklist, backticks)
-  const formatAiText = (text: string) => {
-    let html = text
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-
-    // Bold
-    html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-    
-    // Inline code backticks
-    html = html.replace(/`(.*?)`/g, '<code class="bg-zinc-800 text-amber-400 px-1 py-0.5 rounded text-[11px] font-semibold">$1</code>');
-    
-    // Bullet points
-    const lines = html.split("\n");
-    const formatted = lines.map(line => {
-      const trimmed = line.trim();
-      if (trimmed.startsWith("* ") || trimmed.startsWith("- ")) {
-        return `<li class="ml-4 list-disc my-1.5 leading-relaxed text-xs text-muted-foreground">${trimmed.substring(2)}</li>`;
-      }
-      if (trimmed.match(/^\d+\.\s/)) {
-        const numContent = trimmed.replace(/^\d+\.\s/, "");
-        return `<li class="ml-4 list-decimal my-1.5 leading-relaxed text-xs text-muted-foreground">${numContent}</li>`;
-      }
-      return line;
-    });
-
-    html = formatted.join("\n");
-    
-    // Custom header tags
-    html = html.replace(/### (.*?)\n/g, '<h4 class="text-xs font-bold text-foreground mt-4 mb-2 uppercase tracking-wide border-b pb-1">$1</h4>');
-    html = html.replace(/## (.*?)\n/g, '<h3 class="text-sm font-extrabold text-foreground mt-5 mb-2">$1</h3>');
-    
-    // Newlines
-    html = html.replace(/\n\n/g, '<div class="h-3"></div>');
-    html = html.replace(/\n/g, "<br/>");
-    
-    return html;
-  };
+  // Removed old simple formatter in favor of robust MarkdownRenderer component
 
   return (
     <section className="bg-card border border-border rounded-2xl overflow-hidden shadow-xl flex flex-col mt-10">
@@ -418,15 +382,35 @@ export default function CodeExplorer({ slug }: CodeExplorerProps) {
                   </div>
                 </div>
 
-                {/* Ask Gemini Review button */}
-                <button
-                  onClick={() => handleAskAI()}
-                  disabled={isAiLoading}
-                  title="Minta Gemini mengulas baris kode secara mendalam"
-                  className="p-1.5 rounded-lg border border-border hover:bg-secondary text-muted-foreground hover:text-primary disabled:opacity-50 transition-colors"
-                >
-                  <RefreshCw className={`h-3.5 w-3.5 ${isAiLoading ? 'animate-spin text-primary' : ''}`} />
-                </button>
+                <div className="flex items-center gap-1.5">
+                  {/* Discuss Code in Live Chat */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!activeFile) return;
+                      const query = `Bro, mari diskusikan file ${activeFile.path}. Bisakah kamu jelaskan tentang kode berikut?\n\n\`\`\`${activeFile.language}\n${activeFile.code}\n\`\`\``;
+                      const event = new CustomEvent("open-roketdev-chat", {
+                        detail: { query }
+                      });
+                      window.dispatchEvent(event);
+                    }}
+                    title="Diskusikan kode ini di Live Chat"
+                    className="p-1.5 rounded-lg border border-border hover:bg-secondary text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 text-[10px] font-bold"
+                  >
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Diskusi Chat</span>
+                  </button>
+
+                  {/* Ask Gemini Review button */}
+                  <button
+                    onClick={() => handleAskAI()}
+                    disabled={isAiLoading}
+                    title="Minta Gemini mengulas baris kode secara mendalam"
+                    className="p-1.5 rounded-lg border border-border hover:bg-secondary text-muted-foreground hover:text-primary disabled:opacity-50 transition-colors"
+                  >
+                    <RefreshCw className={`h-3.5 w-3.5 ${isAiLoading ? 'animate-spin text-primary' : ''}`} />
+                  </button>
+                </div>
               </div>
 
               {/* Explanations Display Scrollable */}
@@ -443,10 +427,9 @@ export default function CodeExplorer({ slug }: CodeExplorerProps) {
                       <span className="text-xs font-medium animate-pulse">{t({ id: "AI sedang meneliti kode...", en: "AI is analyzing code logic..." })}</span>
                     </div>
                   ) : (
-                    <div 
-                      className="text-xs text-muted-foreground leading-relaxed font-medium"
-                      dangerouslySetInnerHTML={{ __html: formatAiText(aiExplanation) }}
-                    />
+                    <div className="text-xs text-muted-foreground leading-relaxed font-medium">
+                      <MarkdownRenderer content={aiExplanation} />
+                    </div>
                   )}
                 </div>
 

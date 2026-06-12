@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Bot, X, Send, Sparkles, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import MarkdownRenderer from "./MarkdownRenderer";
 
 interface Message {
   role: "user" | "assistant";
@@ -39,6 +40,8 @@ export default function GeminiChatWidget() {
       setHasNewMessage(false);
     }
   }, [messages, isOpen, isLoading]);
+
+
 
   // Clickable suggest chips
   const suggestionChips = [
@@ -93,44 +96,26 @@ export default function GeminiChatWidget() {
     }
   };
 
-  // Simple client-side Markdown formatter (supports Bold, Bullet Lists, and Links)
-  const formatMessageText = (text: string) => {
-    let html = text;
+  const handleSendRef = useRef(handleSend);
+  useEffect(() => {
+    handleSendRef.current = handleSend;
+  });
 
-    // Escape HTML to prevent XSS
-    html = html
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-
-    // Bold formatting: **text** or *text*
-    html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-
-    // Bullet points: lines starting with "*" or "-"
-    const lines = html.split("\n");
-    const formattedLines = lines.map((line) => {
-      const trimmed = line.trim();
-      if (trimmed.startsWith("* ") || trimmed.startsWith("- ")) {
-        return `<li class="ml-4 list-disc my-1">${trimmed.substring(2)}</li>`;
+  useEffect(() => {
+    const handleOpenChat = (e: CustomEvent<{ query: string }>) => {
+      setIsOpen(true);
+      if (e.detail.query) {
+        handleSendRef.current(e.detail.query);
       }
-      return line;
-    });
-    html = formattedLines.join("\n");
+    };
 
-    // Markdown Links: [text](url)
-    // Note: Decode standard entity references to let URL work
-    html = html.replace(/\[(.*?)\]\((.*?)\)/g, (match, label, url) => {
-      const cleanUrl = url.replace(/&amp;/g, "&");
-      return `<a href="${cleanUrl}" class="text-primary hover:underline font-bold inline-flex items-center gap-0.5 border-b border-primary/20 decoration-2 transition-colors">${label}</a>`;
-    });
+    window.addEventListener("open-roketdev-chat" as any, handleOpenChat);
+    return () => {
+      window.removeEventListener("open-roketdev-chat" as any, handleOpenChat);
+    };
+  }, []);
 
-    // Replace double newlines with spacing
-    html = html.replace(/\n\n/g, '<div class="h-2"></div>');
-    // Replace single newlines with br
-    html = html.replace(/\n/g, "<br />");
-
-    return html;
-  };
+  // Removed old simple formatter in favor of robust MarkdownRenderer component
 
   // Click Interceptor: Makes markdown links behave like client-side Router pushes
   const handleMessageContainerClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -231,10 +216,9 @@ export default function GeminiChatWidget() {
                         ? "bg-primary text-primary-foreground rounded-tr-none font-medium"
                         : "bg-secondary/70 border border-border text-foreground rounded-tl-none"
                     }`}
-                    dangerouslySetInnerHTML={{
-                      __html: formatMessageText(msg.content),
-                    }}
-                  />
+                  >
+                    <MarkdownRenderer content={msg.content} />
+                  </div>
                 </div>
               ))}
 

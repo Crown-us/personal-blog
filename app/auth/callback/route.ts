@@ -24,12 +24,13 @@ export async function GET(request: Request) {
         });
 
         if (!existingUser) {
+          const isAdminEmail = user.email === "wijaya.kevinn@gmail.com";
           await db.insert(users).values({
             email: user.email!,
             fullName: user.user_metadata?.full_name || user.email?.split("@")[0] || "User",
             avatarUrl: user.user_metadata?.avatar_url || null,
-            role: "user",
-            plan: "free",
+            role: isAdminEmail ? "admin" : "user",
+            plan: isAdminEmail ? "pro" : "free",
           });
           console.log(`Synced new user profile to DB: ${user.email}`);
         }

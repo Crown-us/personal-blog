@@ -28,7 +28,7 @@ async function main() {
         email: "admin@roketdev.com",
         fullName: "RoketDev Team",
         avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=60",
-        role: "admin",
+        role: "publisher",
         plan: "pro",
       })
       .returning();

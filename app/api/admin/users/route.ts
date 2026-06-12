@@ -57,6 +57,25 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ success: false, error: "User ID is required" }, { status: 400 });
     }
 
+    // Fetch target user's email to verify permission
+    const targetUser = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+    });
+
+    if (!targetUser) {
+      return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
+    }
+
+    // Only allow setting "admin" role if email is "wijaya.kevinn@gmail.com"
+    if (role === "admin" && targetUser.email !== "wijaya.kevinn@gmail.com") {
+      return NextResponse.json({ success: false, error: "Only wijaya.kevinn@gmail.com can be an admin" }, { status: 400 });
+    }
+
+    // Do not allow changing role of wijaya.kevinn@gmail.com to anything else
+    if (targetUser.email === "wijaya.kevinn@gmail.com" && role !== "admin") {
+      return NextResponse.json({ success: false, error: "Cannot revoke admin role from wijaya.kevinn@gmail.com" }, { status: 400 });
+    }
+
     // Ensure they don't lock themselves out by changing their own admin role
     if (userId === dbCurrentUser.id && role !== "admin") {
       return NextResponse.json({ success: false, error: "Cannot revoke your own admin role" }, { status: 400 });
