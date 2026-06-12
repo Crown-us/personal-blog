@@ -6,6 +6,7 @@ import { mockSourceCodes, mockBlogPosts } from "@/config/mock-data";
 import { ChevronLeft, ExternalLink, CreditCard, BookOpen, Layers } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
 import PageWrapper from "@/components/shared/PageWrapper";
+import CodeExplorer from "@/components/shared/CodeExplorer";
 
 export default function SourceCodeDetail({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = use(params);
@@ -195,6 +196,22 @@ export default function SourceCodeDetail({ params }: { params: Promise<{ slug: s
             </div>
           </div>
         )}
+      </section>
+
+      {/* Interactive Code Explorer & AI Explainer */}
+      <section className="py-10 border-b border-border">
+        <div className="space-y-1.5 mb-6">
+          <h2 className="text-lg font-bold tracking-tight text-foreground flex items-center gap-2">
+            📂 {t({ id: "Eksplorasi Kode & Ulasan AI", en: "Interactive Code Explorer & AI Explainer" })}
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            {t({
+              id: "Telusuri arsitektur struktur berkas proyek ini secara interaktif dan tanyakan fungsi logika kodenya ke AI.",
+              en: "Browse the file structures of this project interactively and ask the AI about the code logic."
+            })}
+          </p>
+        </div>
+        <CodeExplorer slug={product.slug} />
       </section>
 
       {/* Conversion Strategy: Related developer tutorials */}

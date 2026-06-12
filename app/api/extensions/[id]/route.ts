@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { extensions, users } from "@/lib/db/schema";
+import { extensions, users, categories } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getUser } from "@/lib/auth/supabase";
 
@@ -51,7 +51,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       affiliateUrl,
       chromeStoreUrl,
       pricingType,
-      price
+      price,
+      categoryId,
+      categorySlug
     } = body;
 
     const updateData: any = {};
@@ -70,17 +72,66 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       if (chromeStoreUrl !== undefined) updateData.chromeStoreUrl = chromeStoreUrl;
       if (pricingType !== undefined) updateData.pricingType = pricingType;
       if (price !== undefined) updateData.price = price;
+
+      // Handle category update
+      if (categoryId !== undefined) {
+        updateData.categoryId = categoryId;
+      } else if (categorySlug !== undefined) {
+        if (categorySlug === "" || categorySlug === null) {
+          updateData.categoryId = null;
+        } else {
+          const foundCategory = await db.query.categories.findFirst({
+            where: eq(categories.slug, categorySlug),
+          });
+          if (foundCategory) {
+            updateData.categoryId = foundCategory.id;
+          }
+        }
+      }
     } else {
       return NextResponse.json({ success: false, error: "Only admin can audit submissions" }, { status: 403 });
     }
 
-    const [updated] = await db
+    await db
       .update(extensions)
       .set(updateData)
-      .where(eq(extensions.id, id))
-      .returning();
+      .where(eq(extensions.id, id));
 
-    return NextResponse.json({ success: true, extension: updated });
+    // Fetch the updated entry with categories joined to keep response format consistent
+    const [returnedExtension] = await db
+      .select({
+        id: extensions.id,
+        slug: extensions.slug,
+        chromeStoreId: extensions.chromeStoreId,
+        name: extensions.name,
+        tagline: extensions.tagline,
+        description: extensions.description,
+        logoUrl: extensions.logoUrl,
+        websiteUrl: extensions.websiteUrl,
+        affiliateUrl: extensions.affiliateUrl,
+        chromeStoreUrl: extensions.chromeStoreUrl,
+        publisherId: extensions.publisherId,
+        categoryId: extensions.categoryId,
+        categoryName: categories.name,
+        categorySlug: categories.slug,
+        status: extensions.status,
+        isFeatured: extensions.isFeatured,
+        isSponsored: extensions.isSponsored,
+        version: extensions.version,
+        totalUsers: extensions.totalUsers,
+        weeklyUsers: extensions.weeklyUsers,
+        avgRating: extensions.avgRating,
+        totalReviews: extensions.totalReviews,
+        totalInstalls: extensions.totalInstalls,
+        pricingType: extensions.pricingType,
+        price: extensions.price,
+        createdAt: extensions.createdAt,
+      })
+      .from(extensions)
+      .leftJoin(categories, eq(extensions.categoryId, categories.id))
+      .where(eq(extensions.id, id));
+
+    return NextResponse.json({ success: true, extension: returnedExtension });
   } catch (error: any) {
     console.error("Failed to update extension:", error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

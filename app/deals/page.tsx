@@ -194,7 +194,7 @@ export default function DealsPage() {
                       {/* Logo and Rating */}
                       <div className="flex justify-between items-start gap-4">
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-secondary/80 border border-border text-2xl font-bold shadow-inner">
-                          {deal.logoUrl && deal.logoUrl.startsWith("http") ? (
+                          {deal.logoUrl && (deal.logoUrl.startsWith("http") || deal.logoUrl.startsWith("/")) ? (
                             <img src={deal.logoUrl} alt={deal.name} className="h-full w-full object-cover rounded-2xl" />
                           ) : (
                             deal.logoUrl || "🧩"

@@ -27,7 +27,11 @@ import {
   Users,
   Search as SearchIcon,
   Terminal,
-  Code2
+  Code2,
+  Tag,
+  Image as ImageIcon,
+  Copy,
+  Check
 } from "lucide-react";
 import { formatDate, formatNumber } from "@/lib/utils";
 import Link from "next/link";
@@ -45,6 +49,7 @@ import {
 import { useLanguage } from "@/components/LanguageProvider";
 import PageWrapper from "@/components/shared/PageWrapper";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { categories } from "@/config/categories";
 
 export default function AdminDashboard() {
   const { t, language } = useLanguage();
@@ -89,6 +94,27 @@ export default function AdminDashboard() {
     price: "",
     status: "pending"
   });
+
+  // Deals & Images States
+  const [dealModalOpen, setDealModalOpen] = useState(false);
+  const [editingDeal, setEditingDeal] = useState<any | null>(null);
+  const [dealForm, setDealForm] = useState({
+    name: "",
+    tagline: "",
+    description: "",
+    logoUrl: "",
+    websiteUrl: "",
+    affiliateUrl: "",
+    chromeStoreUrl: "",
+    pricingType: "paid",
+    price: "",
+    status: "approved",
+    categorySlug: "shopping"
+  });
+  const [imagesList, setImagesList] = useState<any[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [copiedImagePath, setCopiedImagePath] = useState<string | null>(null);
+
   const [isMounted, setIsMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState<string | null>(null);
@@ -103,9 +129,10 @@ export default function AdminDashboard() {
       fetch("/api/dashboard").then((res) => res.json()),
       fetch("/api/admin/users").then((res) => res.json()).catch(() => ({ success: false, users: [] })),
       fetch("/api/source-code").then((res) => res.json()).catch(() => ({ success: false, sourceCodes: [] })),
-      fetch("/api/admin/reviews").then((res) => res.json()).catch(() => ({ success: false, reviews: [] }))
+      fetch("/api/admin/reviews").then((res) => res.json()).catch(() => ({ success: false, reviews: [] })),
+      fetch("/api/admin/deals-images").then((res) => res.json()).catch(() => ({ success: false, images: [] }))
     ])
-      .then(([dashData, usersData, scData, reviewsData]) => {
+      .then(([dashData, usersData, scData, reviewsData, imagesData]) => {
         if (dashData.success) {
           setUserRole(dashData.role);
           setDbExtensions(dashData.extensions);
@@ -122,10 +149,143 @@ export default function AdminDashboard() {
         if (reviewsData.success) {
           setReviewsList(reviewsData.reviews);
         }
+        if (imagesData.success) {
+          setImagesList(imagesData.images);
+        }
       })
       .catch((err) => console.error("Failed to load admin dashboard data:", err))
       .finally(() => setIsLoading(false));
   }, []);
+
+  const handleOpenAddDeal = () => {
+    setEditingDeal(null);
+    setDealForm({
+      name: "",
+      tagline: "",
+      description: "",
+      logoUrl: "",
+      websiteUrl: "",
+      affiliateUrl: "",
+      chromeStoreUrl: "",
+      pricingType: "paid",
+      price: "",
+      status: "approved",
+      categorySlug: "shopping"
+    });
+    setDealModalOpen(true);
+  };
+
+  const handleOpenEditDeal = (deal: any) => {
+    setEditingDeal(deal);
+    setDealForm({
+      name: deal.name || "",
+      tagline: deal.tagline || "",
+      description: deal.description || "",
+      logoUrl: deal.logoUrl || "",
+      websiteUrl: deal.websiteUrl || "",
+      affiliateUrl: deal.affiliateUrl || "",
+      chromeStoreUrl: deal.chromeStoreUrl || "",
+      pricingType: deal.pricingType || "paid",
+      price: deal.price || "",
+      status: deal.status || "approved",
+      categorySlug: deal.categorySlug || "shopping"
+    });
+    setDealModalOpen(true);
+  };
+
+  const handleSaveDeal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsActionLoading("save-deal");
+    try {
+      if (editingDeal) {
+        // Update
+        const res = await fetch(`/api/extensions/${editingDeal.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: dealForm.name,
+            tagline: dealForm.tagline,
+            description: dealForm.description,
+            logoUrl: dealForm.logoUrl,
+            websiteUrl: dealForm.websiteUrl,
+            affiliateUrl: dealForm.affiliateUrl,
+            chromeStoreUrl: dealForm.chromeStoreUrl || dealForm.websiteUrl,
+            pricingType: dealForm.pricingType,
+            price: dealForm.price || null,
+            status: dealForm.status,
+            categorySlug: dealForm.categorySlug,
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          setDbExtensions(dbExtensions.map((item) => item.id === editingDeal.id ? data.extension : item));
+          setDealModalOpen(false);
+        } else {
+          alert(data.error || "Failed to update deal.");
+        }
+      } else {
+        // Create
+        const res = await fetch(`/api/admin/extensions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: dealForm.name,
+            tagline: dealForm.tagline,
+            description: dealForm.description,
+            logoUrl: dealForm.logoUrl,
+            websiteUrl: dealForm.websiteUrl,
+            affiliateUrl: dealForm.affiliateUrl,
+            chromeStoreUrl: dealForm.chromeStoreUrl || dealForm.websiteUrl,
+            pricingType: dealForm.pricingType,
+            price: dealForm.price || null,
+            status: dealForm.status,
+            categorySlug: dealForm.categorySlug,
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          setDbExtensions([data.extension, ...dbExtensions]);
+          setDealModalOpen(false);
+        } else {
+          alert(data.error || "Failed to create deal.");
+        }
+      }
+    } catch (err) {
+      console.error("Error saving deal:", err);
+      alert("An unexpected error occurred while saving.");
+    } finally {
+      setIsActionLoading(null);
+    }
+  };
+
+  const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/admin/deals-images", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success) {
+        setImagesList([data.image, ...imagesList]);
+        if (dealModalOpen) {
+          setDealForm(prev => ({ ...prev, logoUrl: data.image.url }));
+        }
+      } else {
+        alert(data.error || "Failed to upload image.");
+      }
+    } catch (err) {
+      console.error("Error uploading image:", err);
+      alert("Failed to upload image.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const filteredUsers = React.useMemo(() => {
     if (!searchUserQuery.trim()) return usersList;
@@ -525,6 +685,10 @@ export default function AdminDashboard() {
     return (sum / ratedExts.length).toFixed(1);
   }, [dbExtensions]);
 
+  const dbDeals = React.useMemo(() => {
+    return dbExtensions.filter((ext) => ext.affiliateUrl);
+  }, [dbExtensions]);
+
   // Loader state
   if (isLoading) {
     return (
@@ -618,6 +782,7 @@ export default function AdminDashboard() {
                 { id: "reviews", label: t({ id: "Kontrol Ulasan", en: "Review Control" }), icon: Star },
                 { id: "blog", label: t({ id: "Kelola Tutorial", en: "Manage Tutorials" }), icon: BookOpen },
                 { id: "sourceCode", label: t({ id: "Kelola Source Code", en: "Manage Source Code" }), icon: Terminal },
+                { id: "deals", label: t({ id: "Kelola Deals & Gambar", en: "Deals & Images" }), icon: Tag },
                 { id: "affiliate", label: t({ id: "Afiliasi & Saldo", en: "Affiliate & Balance" }), icon: Wallet },
                 { id: "users", label: t({ id: "Kelola Pengguna", en: "Manage Users" }), icon: Users }
               ].map((tab) => {
@@ -1585,6 +1750,193 @@ export default function AdminDashboard() {
               </div>
             )}
 
+            {/* Tab: Deals Management */}
+            {activeTab === "deals" && (
+              <div className="space-y-6 animate-fade-in text-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <h2 className="text-xl font-bold tracking-tight">{t({ id: "Kontrol Deals & Affiliate Link", en: "Manage Deals & Affiliate Links" })}</h2>
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      {t({ 
+                        id: "Tambah, edit, atau hapus link kemitraan, diskon eksklusif, dan penawaran Shopee.", 
+                        en: "Manage, publish, update or remove partnership deals and affiliate listings." 
+                      })}
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleOpenAddDeal}
+                    className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/95 font-bold text-xs transition-all shadow-md shadow-primary/20 cursor-pointer"
+                  >
+                    <PlusCircle className="h-4 w-4" />
+                    {t({ id: "Tambah Deal Baru", en: "Add New Deal" })}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  {/* Left part: Deals Table */}
+                  <div className="lg:col-span-2 space-y-4">
+                    <div className="border border-border rounded-2xl bg-card overflow-hidden shadow-sm">
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse text-xs min-w-[600px]">
+                          <thead>
+                            <tr className="bg-secondary/40 border-b border-border/60 text-muted-foreground font-semibold uppercase tracking-wider">
+                              <th className="p-4 w-16">{t({ id: "Logo", en: "Logo" })}</th>
+                              <th className="p-4">{t({ id: "Nama Deal", en: "Deal Name" })}</th>
+                              <th className="p-4">{t({ id: "Kategori", en: "Category" })}</th>
+                              <th className="p-4 w-24">{t({ id: "Harga", en: "Price" })}</th>
+                              <th className="p-4 text-center w-32">{t({ id: "Tindakan", en: "Actions" })}</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-border/60 text-muted-foreground">
+                            {dbDeals.length === 0 ? (
+                              <tr>
+                                <td colSpan={5} className="text-center p-8 text-muted-foreground italic">
+                                  {t({ id: "Belum ada deal terdaftar.", en: "No deals registered yet." })}
+                                </td>
+                              </tr>
+                            ) : (
+                              dbDeals.map((deal) => (
+                                <tr key={deal.id} className="hover:bg-secondary/20 transition-all">
+                                  <td className="p-4">
+                                    <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-secondary border border-border overflow-hidden shadow-inner text-lg">
+                                      {deal.logoUrl && (deal.logoUrl.startsWith("http") || deal.logoUrl.startsWith("/")) ? (
+                                        <img src={deal.logoUrl} alt={deal.name} className="h-full w-full object-cover" />
+                                      ) : (
+                                        deal.logoUrl || "🧩"
+                                      )}
+                                    </div>
+                                  </td>
+                                  <td className="p-4 font-semibold text-foreground">
+                                    <div className="flex flex-col">
+                                      <span className="text-sm font-bold text-foreground">{deal.name}</span>
+                                      <span className="text-[10px] text-muted-foreground/60 line-clamp-1 max-w-[250px]" title={deal.affiliateUrl}>
+                                        {deal.affiliateUrl}
+                                      </span>
+                                    </div>
+                                  </td>
+                                  <td className="p-4">
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary border border-primary/20">
+                                      {deal.categoryName || deal.categorySlug || "Shopping"}
+                                    </span>
+                                  </td>
+                                  <td className="p-4 font-semibold text-foreground">
+                                    {deal.pricingType === "free" ? "Free" : `$${deal.price || "0.00"}`}
+                                  </td>
+                                  <td className="p-4 text-center">
+                                    <div className="inline-flex gap-1.5">
+                                      <button
+                                        onClick={() => handleOpenEditDeal(deal)}
+                                        className="px-2 py-1 rounded bg-blue-500 hover:bg-blue-600 text-white font-semibold text-[10px] transition-all cursor-pointer"
+                                      >
+                                        Edit
+                                      </button>
+                                      <button
+                                        disabled={isActionLoading === deal.id + "-delete"}
+                                        onClick={() => handleDeleteSubmission(deal.id)}
+                                        className="p-1.5 rounded-lg border border-border text-rose-500 hover:bg-rose-500/10 transition-all cursor-pointer disabled:opacity-50"
+                                      >
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right part: Image Manager (Tabel Gambar) */}
+                  <div className="space-y-4">
+                    <div className="border border-border rounded-2xl bg-card p-4 space-y-4 shadow-sm">
+                      <div className="flex justify-between items-center pb-2 border-b border-border/60">
+                        <h3 className="font-bold text-sm text-foreground flex items-center gap-1.5">
+                          <ImageIcon className="h-4 w-4 text-primary" />
+                          {t({ id: "Tabel Gambar / Logo", en: "Image Library" })}
+                        </h3>
+                        <span className="text-[10px] bg-secondary border border-border px-2 py-0.5 rounded-full text-muted-foreground font-semibold">
+                          {imagesList.length} files
+                        </span>
+                      </div>
+
+                      {/* File Upload Zone */}
+                      <div>
+                        <label className="flex flex-col items-center justify-center border-2 border-dashed border-border hover:border-primary/60 rounded-xl p-4 cursor-pointer bg-secondary/10 hover:bg-secondary/20 transition-all text-center">
+                          <PlusCircle className="h-6 w-6 text-muted-foreground mb-1 animate-pulse" />
+                          <span className="text-[11px] font-bold text-foreground">
+                            {isUploading ? "Uploading..." : "Upload New Image"}
+                          </span>
+                          <span className="text-[9px] text-muted-foreground mt-0.5">PNG, JPG, WEBP up to 5MB</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleUploadImage}
+                            disabled={isUploading}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+
+                      {/* Image List Table */}
+                      <div className="max-h-[400px] overflow-y-auto space-y-2 pr-1">
+                        {imagesList.length === 0 ? (
+                          <p className="text-center py-8 text-xs text-muted-foreground italic">
+                            No images uploaded yet.
+                          </p>
+                        ) : (
+                          imagesList.map((img) => (
+                            <div 
+                              key={img.name} 
+                              className="flex items-center gap-3 p-2 rounded-xl bg-secondary/20 border border-border/60 hover:border-primary/30 transition-all text-xs"
+                            >
+                              <div className="h-12 w-12 shrink-0 rounded-lg overflow-hidden bg-secondary border border-border flex items-center justify-center shadow-inner">
+                                <img src={img.url} alt={img.name} className="h-full w-full object-cover" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-bold text-foreground truncate" title={img.name}>{img.name}</p>
+                                <p className="text-[10px] text-muted-foreground mt-0.5">
+                                  {(img.sizeBytes / 1024).toFixed(0)} KB
+                                </p>
+                              </div>
+                              <div className="flex flex-col gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(img.url);
+                                    setCopiedImagePath(img.name);
+                                    setTimeout(() => setCopiedImagePath(null), 1500);
+                                  }}
+                                  className="p-1 rounded bg-secondary hover:bg-secondary-foreground/10 text-foreground border border-border transition-all cursor-pointer flex justify-center"
+                                  title="Copy relative image path"
+                                >
+                                  {copiedImagePath === img.name ? (
+                                    <Check className="h-3.5 w-3.5 text-emerald-500" />
+                                  ) : (
+                                    <Copy className="h-3.5 w-3.5" />
+                                  )}
+                                </button>
+                                {dealForm.logoUrl !== img.url && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setDealForm(prev => ({ ...prev, logoUrl: img.url }))}
+                                    className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-primary text-primary-foreground hover:bg-primary/90 transition-all cursor-pointer text-center"
+                                  >
+                                    Use Logo
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Modal Form for Source Code Create / Update */}
             {scModalOpen && (
               <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-fade-in">
@@ -1905,6 +2257,171 @@ export default function AdminDashboard() {
                         className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/95 font-semibold transition-all shadow-md shadow-primary/20 disabled:opacity-50"
                       >
                         {isActionLoading === "save-ext" 
+                          ? t({ id: "Menyimpan...", en: "Saving..." }) 
+                          : t({ id: "Simpan", en: "Save" })
+                        }
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+
+            {/* Modal Form for Deals Create / Edit */}
+            {dealModalOpen && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-fade-in text-xs">
+                <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-border bg-card p-6 shadow-2xl space-y-6">
+                  <div className="flex justify-between items-center pb-4 border-b border-border/60">
+                    <h3 className="text-lg font-bold text-foreground">
+                      {editingDeal 
+                        ? t({ id: "Edit Deal", en: "Edit Deal" }) 
+                        : t({ id: "Tambah Deal Baru", en: "Add New Deal" })
+                      }
+                    </h3>
+                    <button 
+                      onClick={() => setDealModalOpen(false)}
+                      className="text-muted-foreground hover:text-foreground text-xs font-semibold px-2 py-1 rounded-lg border border-border bg-secondary/20 cursor-pointer"
+                    >
+                      Close
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleSaveDeal} className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="font-bold text-foreground">{t({ id: "Nama Deal / Produk", en: "Deal / Product Name" })} *</label>
+                        <input
+                          type="text"
+                          required
+                          value={dealForm.name}
+                          onChange={(e) => setDealForm({ ...dealForm, name: e.target.value })}
+                          className="w-full rounded-xl border border-border bg-secondary/20 p-2.5 text-foreground focus:outline-none focus:border-primary"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="font-bold text-foreground">{t({ id: "Kategori", en: "Category" })} *</label>
+                        <select
+                          value={dealForm.categorySlug}
+                          onChange={(e) => setDealForm({ ...dealForm, categorySlug: e.target.value })}
+                          className="w-full rounded-xl border border-border bg-secondary/20 p-2.5 text-foreground focus:outline-none focus:border-primary font-semibold"
+                        >
+                          {categories.map((cat) => (
+                            <option key={cat.slug} value={cat.slug}>
+                              {cat.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="font-bold text-foreground">{t({ id: "Tagline", en: "Tagline" })}</label>
+                        <input
+                          type="text"
+                          value={dealForm.tagline}
+                          onChange={(e) => setDealForm({ ...dealForm, tagline: e.target.value })}
+                          className="w-full rounded-xl border border-border bg-secondary/20 p-2.5 text-foreground focus:outline-none focus:border-primary"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="font-bold text-foreground">{t({ id: "Harga ($) / Bulan", en: "Price ($) / Month" })}</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          placeholder="e.g. 9.99"
+                          value={dealForm.price}
+                          onChange={(e) => setDealForm({ ...dealForm, price: e.target.value })}
+                          className="w-full rounded-xl border border-border bg-secondary/20 p-2.5 text-foreground focus:outline-none focus:border-primary"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-bold text-foreground">{t({ id: "Deskripsi", en: "Description" })} *</label>
+                      <textarea
+                        required
+                        rows={4}
+                        value={dealForm.description}
+                        onChange={(e) => setDealForm({ ...dealForm, description: e.target.value })}
+                        className="w-full rounded-xl border border-border bg-secondary/20 p-2.5 text-foreground focus:outline-none focus:border-primary font-mono text-[11px]"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="font-bold text-foreground">{t({ id: "Link Kemitraan / Affiliate Url", en: "Partner / Affiliate Url" })} *</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. https://s.shopee.co.id/..."
+                          value={dealForm.affiliateUrl}
+                          onChange={(e) => setDealForm({ ...dealForm, affiliateUrl: e.target.value })}
+                          className="w-full rounded-xl border border-border bg-secondary/20 p-2.5 text-foreground focus:outline-none focus:border-primary font-semibold"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="font-bold text-foreground">{t({ id: "Website Url Resmi", en: "Official Website Url" })}</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. https://shopee.co.id/..."
+                          value={dealForm.websiteUrl}
+                          onChange={(e) => setDealForm({ ...dealForm, websiteUrl: e.target.value })}
+                          className="w-full rounded-xl border border-border bg-secondary/20 p-2.5 text-foreground focus:outline-none focus:border-primary"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="font-bold text-foreground">{t({ id: "Logo Url / Emoji", en: "Logo Url / Emoji" })}</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. /deals/office-365.png"
+                          value={dealForm.logoUrl}
+                          onChange={(e) => setDealForm({ ...dealForm, logoUrl: e.target.value })}
+                          className="w-full rounded-xl border border-border bg-secondary/20 p-2.5 text-foreground focus:outline-none focus:border-primary font-mono text-[11px]"
+                        />
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          {t({ 
+                            id: "Tips: Klik 'Use Logo' di tabel gambar perpustakaan di samping kanan untuk mengisi otomatis.", 
+                            en: "Tip: Click 'Use Logo' on the image library to the right to auto-fill." 
+                          })}
+                        </p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="font-bold text-foreground">{t({ id: "Status Moderasi", en: "Moderation Status" })} *</label>
+                        <select
+                          value={dealForm.status}
+                          onChange={(e) => setDealForm({ ...dealForm, status: e.target.value })}
+                          className="w-full rounded-xl border border-border bg-secondary/20 p-2.5 text-foreground focus:outline-none focus:border-primary font-bold text-primary"
+                        >
+                          <option value="approved">Approved</option>
+                          <option value="featured">Featured (Approved & Highlighted)</option>
+                          <option value="pending">Pending</option>
+                          <option value="rejected">Rejected</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-2 pt-4 border-t border-border/60">
+                      <button
+                        type="button"
+                        onClick={() => setDealModalOpen(false)}
+                        className="px-4 py-2.5 rounded-xl border border-border text-foreground hover:bg-secondary/40 font-semibold transition-all cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isActionLoading === "save-deal"}
+                        className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/95 font-semibold transition-all shadow-md shadow-primary/20 disabled:opacity-50 cursor-pointer"
+                      >
+                        {isActionLoading === "save-deal" 
                           ? t({ id: "Menyimpan...", en: "Saving..." }) 
                           : t({ id: "Simpan", en: "Save" })
                         }
