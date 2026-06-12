@@ -137,7 +137,7 @@ export default function Navbar() {
               aria-label="Change Language"
             >
               <Globe className="h-3.5 w-3.5" />
-              <span>{language === "id" ? "🇮🇩 ID" : "🇬🇧 EN"}</span>
+              <span>{language === "id" ? "ID" : "EN"}</span>
             </button>
             
             <AnimatePresence>
@@ -159,26 +159,26 @@ export default function Navbar() {
                         setLanguage("id");
                         setIsLangOpen(false);
                       }}
-                      className={`flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-medium transition-colors ${
+                      className={`flex w-full items-center justify-center rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
                         language === "id" 
                           ? "bg-secondary text-foreground font-bold" 
                           : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
                       }`}
                     >
-                      <span>🇮🇩</span> ID
+                      ID
                     </button>
                     <button
                       onClick={() => {
                         setLanguage("en");
                         setIsLangOpen(false);
                       }}
-                      className={`flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-medium transition-colors ${
+                      className={`flex w-full items-center justify-center rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
                         language === "en" 
                           ? "bg-secondary text-foreground font-bold" 
                           : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
                       }`}
                     >
-                      <span>🇬🇧</span> EN
+                      EN
                     </button>
                   </motion.div>
                 </>
@@ -221,7 +221,7 @@ export default function Navbar() {
             className="p-1.5 rounded-lg border border-border hover:bg-secondary text-xs font-bold text-muted-foreground"
             aria-label="Change Language"
           >
-            {language === "id" ? "🇮🇩 ID" : "🇬🇧 EN"}
+            {language === "id" ? "ID" : "EN"}
           </button>
 
           <button
