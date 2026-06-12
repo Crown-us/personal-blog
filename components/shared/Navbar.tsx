@@ -57,7 +57,7 @@ export default function Navbar() {
       <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         
         {/* Left Side: Logo & Links */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-3 lg:gap-5 xl:gap-6">
           <Link href="/" className="flex items-center gap-2 font-bold tracking-tight text-foreground group whitespace-nowrap">
             <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-tr from-red-500 to-primary text-white shadow-sm shadow-primary/10 group-hover:scale-105 group-hover:rotate-3 transition-all duration-300">
               <Rocket className="h-3.5 w-3.5 fill-current" />
@@ -68,14 +68,14 @@ export default function Navbar() {
           </Link>
 
           {/* Directory nav links */}
-          <nav className="hidden md:flex items-center gap-4">
+          <nav className="hidden md:flex items-center gap-2.5 lg:gap-3.5 xl:gap-4.5">
             {navigation.main.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`text-xs font-semibold transition-colors hover:text-foreground relative py-1 whitespace-nowrap ${
+                  className={`text-[11px] lg:text-xs font-semibold transition-colors hover:text-foreground relative py-1 whitespace-nowrap ${
                     isActive ? "text-primary" : "text-muted-foreground"
                   }`}
                 >
@@ -97,7 +97,7 @@ export default function Navbar() {
         {pathname !== "/" && (
           <form 
             onSubmit={handleSearchSubmit} 
-            className="hidden md:flex items-center bg-secondary/80 border border-border rounded-lg px-2.5 py-1 w-64 text-xs"
+            className="hidden md:flex items-center bg-secondary/80 border border-border rounded-lg px-2 py-0.5 md:w-32 lg:w-48 xl:w-60 mx-2 lg:mx-4 text-xs transition-all"
           >
             <Search className="h-3.5 w-3.5 text-muted-foreground mr-1.5" />
             <input
@@ -105,17 +105,17 @@ export default function Navbar() {
               placeholder={dict["nav.searchPlaceholder"]}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-transparent focus:outline-none text-foreground w-full placeholder:text-muted-foreground/60"
+              className="bg-transparent focus:outline-none text-foreground w-full placeholder:text-muted-foreground/60 text-[11px] lg:text-xs"
             />
           </form>
         )}
 
         {/* Right Side: CTAs & Theme Toggle */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-1.5 lg:gap-2.5 xl:gap-3">
           
           <Link
             href="/compare"
-            className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-border bg-secondary/35 text-foreground hover:bg-secondary transition-all whitespace-nowrap"
+            className="flex items-center gap-1 text-[10px] lg:text-[11px] px-2 lg:px-2.5 py-1 rounded-lg border border-border bg-secondary/35 text-foreground hover:bg-secondary transition-all whitespace-nowrap"
           >
             <Layers className="h-3 w-3" />
             {dict["nav.compare"]}
@@ -123,7 +123,7 @@ export default function Navbar() {
 
           <Link
             href="/wishlist"
-            className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-border bg-secondary/35 text-foreground hover:bg-secondary transition-all whitespace-nowrap"
+            className="flex items-center gap-1 text-[10px] lg:text-[11px] px-2 lg:px-2.5 py-1 rounded-lg border border-border bg-secondary/35 text-foreground hover:bg-secondary transition-all whitespace-nowrap"
           >
             <Heart className="h-3.5 w-3.5 text-rose-500" />
             Wishlist
@@ -198,7 +198,7 @@ export default function Navbar() {
           <Link
             href="/dashboard"
             target="_blank"
-            className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+            className="flex items-center gap-1 text-[10px] lg:text-[11px] font-semibold text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
           >
             <LayoutDashboard className="h-3.5 w-3.5" />
             {dict["nav.console"]}
@@ -206,7 +206,7 @@ export default function Navbar() {
 
           <Link
             href="/submit"
-            className="flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition-all whitespace-nowrap"
+            className="flex items-center gap-1 rounded-lg bg-primary px-2 lg:px-3 py-1 lg:py-1.5 text-[10px] lg:text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition-all whitespace-nowrap"
           >
             <Plus className="h-3.5 w-3.5" />
             {dict["nav.submit"]}
