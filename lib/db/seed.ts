@@ -90,7 +90,7 @@ async function main() {
           chromeStoreUrl: mockExt.chromeStoreUrl || "",
           publisherId: adminUser.id,
           categoryId: categoryId,
-          status: mockExt.status as any,
+          status: mockExt.status as "pending" | "approved" | "rejected" | "featured",
           isFeatured: mockExt.isFeatured || false,
           isSponsored: mockExt.isSponsored || false,
           version: mockExt.version,
@@ -104,7 +104,7 @@ async function main() {
           metaDescription: mockExt.metaDescription,
           tags: mockExt.tags,
           permissions: mockExt.permissions,
-          pricingType: mockExt.pricingType as any,
+          pricingType: mockExt.pricingType as "free" | "freemium" | "paid",
           price: mockExt.price?.toString() || null,
         })
         .returning();

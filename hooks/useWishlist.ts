@@ -14,7 +14,10 @@ export function useWishlist() {
     const saved = localStorage.getItem("roketdev_wishlist");
     if (saved) {
       try {
-        setWishlist(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        setTimeout(() => {
+          setWishlist(parsed);
+        }, 0);
       } catch (e) {
         console.error("Failed to parse wishlist items", e);
       }

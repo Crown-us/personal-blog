@@ -20,7 +20,7 @@ export default function AdSense({
   useEffect(() => {
     // Only execute on client side and prevent crashes if script is blocked by an ad-blocker
     try {
-      const adsbygoogle = (window as any).adsbygoogle || [];
+      const adsbygoogle = (window as Window & { adsbygoogle?: unknown[] }).adsbygoogle || [];
       adsbygoogle.push({});
     } catch (err) {
       console.warn("AdSense warning (likely blocked by AdBlocker):", err);

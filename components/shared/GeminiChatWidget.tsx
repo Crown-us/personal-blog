@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Bot, X, Send, Sparkles, MessageSquare } from "lucide-react";
+import { Bot, X, Send, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import MarkdownRenderer from "./MarkdownRenderer";
 
@@ -37,7 +37,6 @@ export default function GeminiChatWidget() {
     if (isOpen) {
       scrollToBottom();
       inputRef.current?.focus();
-      setHasNewMessage(false);
     }
   }, [messages, isOpen, isLoading]);
 
@@ -104,14 +103,15 @@ export default function GeminiChatWidget() {
   useEffect(() => {
     const handleOpenChat = (e: CustomEvent<{ query: string }>) => {
       setIsOpen(true);
+      setHasNewMessage(false);
       if (e.detail.query) {
         handleSendRef.current(e.detail.query);
       }
     };
 
-    window.addEventListener("open-roketdev-chat" as any, handleOpenChat);
+    window.addEventListener("open-roketdev-chat", handleOpenChat as EventListener);
     return () => {
-      window.removeEventListener("open-roketdev-chat" as any, handleOpenChat);
+      window.removeEventListener("open-roketdev-chat", handleOpenChat as EventListener);
     };
   }, []);
 
@@ -158,7 +158,12 @@ export default function GeminiChatWidget() {
 
         {/* Chatbot Button */}
         <button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => {
+            setIsOpen(!isOpen);
+            if (!isOpen) {
+              setHasNewMessage(false);
+            }
+          }}
           className="relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-violet-600 via-indigo-600 to-primary text-white shadow-xl hover:shadow-primary/30 transition-all hover:scale-105 active:scale-95 group focus:outline-none"
           aria-label="Tanya Gemini AI"
         >

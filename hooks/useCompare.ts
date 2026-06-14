@@ -9,7 +9,10 @@ export function useCompare() {
     const saved = localStorage.getItem("roketdev_compare_ids");
     if (saved) {
       try {
-        setCompareIds(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        setTimeout(() => {
+          setCompareIds(parsed);
+        }, 0);
       } catch (e) {
         console.error("Failed to parse compare IDs", e);
       }

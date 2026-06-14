@@ -10,14 +10,15 @@ import { Star, Download, Globe, Shield, ExternalLink, Calendar, MessageSquare, A
 import { formatNumber } from "@/lib/utils";
 import { useLanguage } from "@/components/LanguageProvider";
 import PageWrapper from "@/components/shared/PageWrapper";
+import { ExtensionWithDetails } from "@/types/extension";
 
 export default function ExtensionDetail({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = use(params);
   const slug = resolvedParams.slug;
   const { compareIds, toggleCompare, clearCompare } = useCompare();
-  const { language, t, dict, tExtension, tSourceCode, tBlog } = useLanguage();
+  const { language, t, tExtension, tSourceCode, tBlog } = useLanguage();
 
-  const [dbExtension, setDbExtension] = useState<any>(null);
+  const [dbExtension, setDbExtension] = useState<ExtensionWithDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -25,7 +26,7 @@ export default function ExtensionDetail({ params }: { params: Promise<{ slug: st
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          const found = data.extensions.find((ext: any) => ext.slug === slug);
+          const found = data.extensions.find((ext: ExtensionWithDetails) => ext.slug === slug);
           if (found) {
             setDbExtension(found);
           }
@@ -56,7 +57,10 @@ export default function ExtensionDetail({ params }: { params: Promise<{ slug: st
         const stored = localStorage.getItem("roketdev_bookmarks");
         if (stored) {
           const bookmarks = JSON.parse(stored);
-          setIsBookmarked(bookmarks.includes(extension.slug) || bookmarks.includes(extension.id));
+          const isSaved = bookmarks.includes(extension.slug) || bookmarks.includes(extension.id);
+          setTimeout(() => {
+            setIsBookmarked(isSaved);
+          }, 0);
         }
       } catch (e) {
         console.error(e);
@@ -106,8 +110,8 @@ export default function ExtensionDetail({ params }: { params: Promise<{ slug: st
     let sum = 0;
     
     reviews.forEach((r) => {
-      // @ts-ignore
-      distribution[r.rating] = (distribution[r.rating] || 0) + 1;
+      const ratingKey = r.rating as 5 | 4 | 3 | 2 | 1;
+      distribution[ratingKey] = (distribution[ratingKey] || 0) + 1;
       sum += r.rating;
     });
 
@@ -349,6 +353,18 @@ export default function ExtensionDetail({ params }: { params: Promise<{ slug: st
     };
   }, [extension, language]);
 
+  if (isLoading && !dbExtension) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center py-20 gap-3">
+        <div className="relative select-none">
+          <div className="h-10 w-10 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+          <span className="absolute -inset-2 rounded-full bg-primary/5 blur animate-pulse" />
+        </div>
+        <p className="text-xs text-muted-foreground font-semibold tracking-wide animate-pulse">Loading Extension Details...</p>
+      </div>
+    );
+  }
+
   if (!extension) {
     return (
       <div className="text-center py-20 flex-1 flex flex-col items-center justify-center">
@@ -553,7 +569,7 @@ export default function ExtensionDetail({ params }: { params: Promise<{ slug: st
               🖼️ {t({ id: "Tangkapan Layar", en: "Screenshots" })}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {extension.screenshots.map((screen: any) => (
+              {extension.screenshots.map((screen: { id: string; url: string; altText: string }) => (
                 <div key={screen.id} className="relative aspect-video rounded-xl overflow-hidden border border-border bg-card group cursor-zoom-in">
                   <img
                     src={screen.url}
@@ -994,8 +1010,7 @@ export default function ExtensionDetail({ params }: { params: Promise<{ slug: st
               {/* Dist bars */}
               <div className="space-y-2 pt-2 text-xs">
                 {[5, 4, 3, 2, 1].map((stars) => {
-                  // @ts-ignore
-                  const count = ratingsSummary.distribution[stars] || 0;
+                  const count = ratingsSummary.distribution[stars as 5 | 4 | 3 | 2 | 1] || 0;
                   const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
                   return (
                     <div key={stars} className="flex items-center gap-3">

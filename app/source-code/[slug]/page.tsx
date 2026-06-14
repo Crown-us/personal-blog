@@ -3,19 +3,21 @@
 import React, { use, useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { mockSourceCodes, mockBlogPosts } from "@/config/mock-data";
-import { ChevronLeft, ExternalLink, CreditCard, BookOpen, Layers } from "lucide-react";
+import { ChevronLeft, ExternalLink, CreditCard, BookOpen } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
 import PageWrapper from "@/components/shared/PageWrapper";
 import CodeExplorer from "@/components/shared/CodeExplorer";
+import { motion } from "framer-motion";
+import { SourceCodeProduct } from "@/types/source-code";
 
 export default function SourceCodeDetail({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = use(params);
   const slug = resolvedParams.slug;
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
   const [showCheckoutOptions, setShowCheckoutOptions] = useState(false);
-  const { language, t, dict, tSourceCode, tBlog } = useLanguage();
+  const { language, t, tSourceCode, tBlog } = useLanguage();
 
-  const [dbProduct, setDbProduct] = useState<any>(null);
+  const [dbProduct, setDbProduct] = useState<SourceCodeProduct | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -23,7 +25,7 @@ export default function SourceCodeDetail({ params }: { params: Promise<{ slug: s
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          const found = data.sourceCodes.find((item: any) => item.slug === slug);
+          const found = data.sourceCodes.find((item: SourceCodeProduct) => item.slug === slug);
           if (found) {
             setDbProduct(found);
           }
@@ -65,6 +67,18 @@ export default function SourceCodeDetail({ params }: { params: Promise<{ slug: s
     }
   };
 
+  if (isLoading && !dbProduct) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center py-20 gap-3">
+        <div className="relative select-none">
+          <div className="h-10 w-10 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+          <span className="absolute -inset-2 rounded-full bg-primary/5 blur animate-pulse" />
+        </div>
+        <p className="text-xs text-muted-foreground font-semibold tracking-wide animate-pulse">Loading Sandbox Explorer...</p>
+      </div>
+    );
+  }
+
   if (!product) {
     return (
       <div className="text-center py-20 flex-1 flex flex-col items-center justify-center">
@@ -100,9 +114,13 @@ export default function SourceCodeDetail({ params }: { params: Promise<{ slug: s
         
         {/* Left Side: Thumbnail & Title details */}
         <div className="lg:col-span-2 flex flex-col sm:flex-row gap-6 items-start">
-          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-secondary/80 border border-border text-5xl shadow-md">
-            {product.thumbnail}
-          </div>
+          <motion.div 
+            whileHover={{ scale: 1.05, rotate: 1 }}
+            className="flex h-24 w-24 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-tr from-secondary/90 to-card border border-border/80 text-5xl shadow-lg shadow-indigo-500/5 relative select-none"
+          >
+            <span className="absolute -inset-1 rounded-3xl bg-gradient-to-tr from-indigo-500/10 to-primary/10 opacity-40 blur-sm" />
+            <span className="relative z-10">{product.thumbnail}</span>
+          </motion.div>
           
           <div className="space-y-3">
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
@@ -127,20 +145,37 @@ export default function SourceCodeDetail({ params }: { params: Promise<{ slug: s
         </div>
 
         {/* Right Side: Buy Card panel */}
-        <div className="rounded-2xl border border-border bg-card p-6 space-y-4 shadow-md">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">{t({ id: "Harga", en: "Price" })}:</span>
-            <span className="font-extrabold text-foreground text-lg text-primary">
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          className="rounded-2xl border border-border/80 bg-gradient-to-b from-card to-secondary/35 p-6 space-y-4 shadow-xl shadow-indigo-500/[0.02] relative overflow-hidden group w-full lg:max-w-xs"
+        >
+          {/* Subtle background glow */}
+          <span className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-primary/5 blur-2xl group-hover:bg-primary/10 transition-colors" />
+          
+          <div className="flex items-center justify-between text-sm pb-1.5 border-b border-border/40">
+            <span className="text-muted-foreground font-semibold">{t({ id: "Harga", en: "Price" })}:</span>
+            <span className="font-black text-foreground text-xl text-primary tracking-tight bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent">
               {product.price}
             </span>
           </div>
 
           {purchaseSuccess ? (
-            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 text-xs font-semibold text-emerald-500 text-center">
-              {t({ id: "✓ Pembelian berhasil! Periksa email Anda untuk mengunduh.", en: "✓ Purchase successful! check your inbox for download link." })}
-            </div>
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-4 text-xs font-bold text-emerald-500 text-center space-y-1"
+            >
+              <div>{t({ id: "✓ Pembelian berhasil!", en: "✓ Purchase successful!" })}</div>
+              <div className="text-[10px] text-emerald-500/80 font-semibold">{t({ id: "Periksa email Anda untuk mengunduh.", en: "Check your inbox for download link." })}</div>
+            </motion.div>
           ) : showCheckoutOptions ? (
-            <div className="space-y-2">
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-2 pt-1.5"
+            >
               <a
                 href={`https://wa.me/6285117394678?text=${encodeURIComponent(
                   language === "id"
@@ -149,7 +184,7 @@ export default function SourceCodeDetail({ params }: { params: Promise<{ slug: s
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full rounded-xl bg-[#25D366] text-white py-3 text-sm font-semibold hover:bg-[#20ba56] transition-all shadow-md shadow-emerald-500/10"
+                className="flex items-center justify-center gap-2 w-full rounded-xl bg-[#25D366] text-white py-3 text-xs sm:text-sm font-bold hover:bg-[#20ba56] transition-all shadow-lg shadow-emerald-500/10 focus:outline-none"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor" className="h-4 w-4">
                   <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7 .9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
@@ -157,6 +192,7 @@ export default function SourceCodeDetail({ params }: { params: Promise<{ slug: s
                 {t({ id: "Hubungi via WhatsApp", en: "Buy via WhatsApp" })}
               </a>
               <button
+                type="button"
                 onClick={() => {
                   setPurchaseSuccess(true);
                   try {
@@ -170,22 +206,24 @@ export default function SourceCodeDetail({ params }: { params: Promise<{ slug: s
                     console.error("Failed to save purchase:", e);
                   }
                 }}
-                className="flex items-center justify-center gap-2 w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/95 transition-all shadow-md shadow-primary/20"
+                className="flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-primary to-indigo-650 py-3 text-xs sm:text-sm font-bold text-primary-foreground hover:opacity-95 transition-all shadow-lg shadow-primary/20 focus:outline-none"
               >
                 <CreditCard className="h-4 w-4" />
                 {t({ id: "Simulasi Pembayaran", en: "Simulate Payment" })}
               </button>
               <button
+                type="button"
                 onClick={() => setShowCheckoutOptions(false)}
-                className="w-full text-center text-xs text-muted-foreground hover:text-foreground font-semibold py-1 transition-colors"
+                className="w-full text-center text-xs text-muted-foreground hover:text-foreground font-bold py-1.5 transition-colors focus:outline-none"
               >
                 {t({ id: "Batal", en: "Cancel" })}
               </button>
-            </div>
+            </motion.div>
           ) : (
             <button
+              type="button"
               onClick={handlePurchase}
-              className="flex items-center justify-center gap-2 w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/95 transition-all shadow-md shadow-primary/20"
+              className="flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-primary to-indigo-650 py-3 text-xs sm:text-sm font-extrabold text-primary-foreground hover:opacity-95 transition-all shadow-lg shadow-primary/20 focus:outline-none"
             >
               <CreditCard className="h-4 w-4" />
               {t({ id: "Beli Sekarang", en: "Instant Purchase" })}
@@ -197,17 +235,18 @@ export default function SourceCodeDetail({ params }: { params: Promise<{ slug: s
               href={product.demoLink}
               target="_blank"
               rel="noreferrer"
-              className="flex-1 py-2 px-3 text-xs font-semibold rounded-xl border border-border hover:bg-secondary text-foreground text-center flex items-center justify-center gap-1"
+              className="flex-1 py-2 px-3 text-xs font-bold rounded-xl border border-border bg-card hover:bg-secondary text-foreground text-center flex items-center justify-center gap-1.5 transition-all hover:scale-[1.02] focus:outline-none"
             >
               {t({ id: "Demo Live", en: "Live Demo" })}
               <ExternalLink className="h-3.5 w-3.5" />
             </a>
           </div>
 
-          <p className="text-[10px] text-center text-muted-foreground leading-relaxed">
+          <p className="text-[10px] text-center text-muted-foreground/85 leading-relaxed font-medium">
             {t({ id: "Pembayaran aman. Tautan unduhan langsung diberikan setelah verifikasi.", en: "Secure checkout. Immediate link authorization upon verification." })}
           </p>
-        </div>
+        </motion.div>
+
 
       </section>
 

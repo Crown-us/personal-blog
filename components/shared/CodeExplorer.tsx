@@ -38,6 +38,30 @@ const findFirstFile = (folder: CodeFolder): CodeFile | null => {
   return null;
 };
 
+// Helper to get styled file type icons
+const getFileIcon = (fileName: string, isActive: boolean) => {
+  const ext = fileName.split(".").pop();
+  if (fileName === "package.json") {
+    return <span className={`text-[12px] font-bold ${isActive ? 'text-rose-400 animate-pulse' : 'text-rose-400/80'} select-none mr-0.5`}>⬢</span>;
+  }
+  if (ext === "json") {
+    return <span className={`text-[12px] font-bold ${isActive ? 'text-amber-400' : 'text-amber-400/80'} select-none`}>{"{"}</span>;
+  }
+  if (ext === "ts" || ext === "tsx") {
+    return <span className={`text-[9px] font-extrabold px-1 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 select-none mr-0.5 scale-90`}>TS</span>;
+  }
+  if (ext === "js" || ext === "jsx") {
+    return <span className={`text-[9px] font-extrabold px-1 rounded bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 select-none mr-0.5 scale-90`}>JS</span>;
+  }
+  if (ext === "css") {
+    return <span className={`text-[12px] font-extrabold ${isActive ? 'text-indigo-400' : 'text-indigo-400/80'} select-none`}>#</span>;
+  }
+  if (ext === "html") {
+    return <span className={`text-[11px] font-bold ${isActive ? 'text-orange-400' : 'text-orange-400/80'} select-none`}>&lt;&gt;</span>;
+  }
+  return <FileCode className="h-3.5 w-3.5 shrink-0" />;
+};
+
 export default function CodeExplorer({ slug }: CodeExplorerProps) {
   const { t } = useLanguage();
   const projectStructure = projectCodeStructures[slug];
@@ -45,6 +69,9 @@ export default function CodeExplorer({ slug }: CodeExplorerProps) {
   const firstFile = projectStructure ? findFirstFile(projectStructure.root) : null;
 
   const [activeFile, setActiveFile] = useState<CodeFile | null>(firstFile);
+  const [openTabs, setOpenTabs] = useState<CodeFile[]>(() => {
+    return firstFile ? [firstFile] : [];
+  });
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
     if (projectStructure) {
@@ -79,9 +106,33 @@ export default function CodeExplorer({ slug }: CodeExplorerProps) {
     setActiveFile(file);
     setAiExplanation(file.explanation);
     setCustomQuestion("");
+    
+    // Add to openTabs if not already present
+    setOpenTabs(prev => {
+      if (prev.some(t => t.path === file.path)) return prev;
+      return [...prev, file];
+    });
+
     // Automatically switch to code tab on mobile
     if (window.innerWidth < 1024) {
       setActiveTab("code");
+    }
+  };
+
+  const handleCloseTab = (e: React.MouseEvent, fileToClose: CodeFile) => {
+    e.stopPropagation();
+    const updatedTabs = openTabs.filter(t => t.path !== fileToClose.path);
+    setOpenTabs(updatedTabs);
+    
+    if (activeFile?.path === fileToClose.path) {
+      if (updatedTabs.length > 0) {
+        const nextActive = updatedTabs[updatedTabs.length - 1];
+        setActiveFile(nextActive);
+        setAiExplanation(nextActive.explanation);
+      } else {
+        setActiveFile(null);
+        setAiExplanation("");
+      }
     }
   };
 
@@ -234,15 +285,17 @@ export default function CodeExplorer({ slug }: CodeExplorerProps) {
         <button
           key={file.path}
           onClick={() => handleSelectFile(file)}
-          className={`flex items-center gap-1.5 w-full py-1.5 rounded-lg text-left text-xs font-medium transition-all px-2 ${
+          className={`flex items-center gap-1.5 w-full py-1.5 rounded-lg text-left text-xs font-medium transition-all px-2 focus:outline-none relative group ${
             isActive 
-              ? "bg-primary/10 text-primary border-l-2 border-primary" 
-              : "hover:bg-secondary/30 text-muted-foreground hover:text-foreground border-l-2 border-transparent"
+              ? "bg-primary/10 text-primary border-l-2 border-primary font-semibold" 
+              : "hover:bg-secondary/35 text-muted-foreground hover:text-foreground border-l-2 border-transparent"
           }`}
           style={{ paddingLeft: `${depth * 8 + 14}px` }}
         >
-          <FileCode className={`h-3.5 w-3.5 shrink-0 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
-          <span className="truncate">{file.name}</span>
+          <span className="flex items-center gap-1 shrink-0">
+            {getFileIcon(file.name, isActive)}
+          </span>
+          <span className="truncate group-hover:translate-x-0.5 transition-transform duration-150">{file.name}</span>
         </button>
       );
     }
@@ -251,20 +304,20 @@ export default function CodeExplorer({ slug }: CodeExplorerProps) {
   // Removed old simple formatter in favor of robust MarkdownRenderer component
 
   return (
-    <section className="bg-card border border-border rounded-2xl overflow-hidden shadow-xl flex flex-col mt-10">
+    <section className="bg-card/90 backdrop-blur-xl border border-border/80 rounded-2xl overflow-hidden shadow-2xl flex flex-col mt-10 transition-all duration-300 hover:shadow-indigo-500/5 hover:border-border">
       
       {/* Window Mock Bar Header */}
-      <div className="bg-secondary/40 border-b border-border/80 px-4 py-3.5 flex justify-between items-center shrink-0">
+      <div className="bg-secondary/55 border-b border-border/80 px-4 py-4 flex justify-between items-center shrink-0">
         <div className="flex items-center gap-6">
           {/* Traffic Lights buttons */}
-          <div className="flex gap-1.5">
-            <span className="h-3 w-3 rounded-full bg-rose-500/80 inline-block" />
-            <span className="h-3 w-3 rounded-full bg-amber-500/80 inline-block" />
-            <span className="h-3 w-3 rounded-full bg-emerald-500/80 inline-block" />
+          <div className="flex gap-1.5 select-none">
+            <span className="h-3 w-3 rounded-full bg-rose-500/80 inline-block hover:brightness-90 transition-all cursor-pointer" />
+            <span className="h-3 w-3 rounded-full bg-amber-500/80 inline-block hover:brightness-90 transition-all cursor-pointer" />
+            <span className="h-3 w-3 rounded-full bg-emerald-500/80 inline-block hover:brightness-90 transition-all cursor-pointer" />
           </div>
           
-          <div className="flex items-center gap-1.5">
-            <Terminal className="h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center gap-2 select-none">
+            <Terminal className="h-4 w-4 text-primary" />
             <span className="text-xs font-bold text-foreground tracking-tight select-none">
               {projectStructure.root.name} &mdash; Sandbox Explorer
             </span>
@@ -272,14 +325,14 @@ export default function CodeExplorer({ slug }: CodeExplorerProps) {
         </div>
 
         {/* Action Status Indicator */}
-        <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold text-primary px-2.5 py-1 rounded bg-primary/5 border border-primary/10">
+        <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold text-primary px-3 py-1 rounded-xl bg-primary/10 border border-primary/20 select-none shadow-sm shadow-primary/5">
           <Cpu className="h-3.5 w-3.5 animate-pulse text-primary" />
           {t({ id: "Live Preview", en: "Live Preview" })}
         </div>
       </div>
 
       {/* Tab Selectors for Mobile/Tablet */}
-      <div className="lg:hidden flex border-b border-border bg-card">
+      <div className="lg:hidden flex border-b border-border bg-card/60 backdrop-blur-sm select-none">
         <button
           onClick={() => setActiveTab("files")}
           className={`flex-1 py-3 text-xs font-bold border-b-2 text-center transition-colors ${
@@ -310,11 +363,11 @@ export default function CodeExplorer({ slug }: CodeExplorerProps) {
       <div className="grid grid-cols-1 lg:grid-cols-4 min-h-[460px] h-[520px] items-stretch">
         
         {/* Column 1: File Tree Selector (Hidden on mobile unless active) */}
-        <div className={`lg:col-span-1 border-r border-border bg-zinc-950/15 backdrop-blur-sm p-4 overflow-y-auto ${
+        <div className={`lg:col-span-1 border-r border-border/80 bg-zinc-950/5 dark:bg-zinc-950/20 backdrop-blur-sm p-4 overflow-y-auto ${
           activeTab === "files" ? "block" : "hidden lg:block"
         }`}>
           <div className="space-y-1">
-            <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest pl-2 mb-3">
+            <h4 className="text-[10px] font-bold text-muted-foreground/65 uppercase tracking-widest pl-2 mb-3 select-none">
               {t({ id: "Struktur Direktori", en: "Directory Tree" })}
             </h4>
             {renderTree(projectStructure.root)}
@@ -322,33 +375,67 @@ export default function CodeExplorer({ slug }: CodeExplorerProps) {
         </div>
 
         {/* Column 2 & 3: Code Editor Workspace (Hidden on mobile unless active) */}
-        <div className={`lg:col-span-2 border-r border-border bg-zinc-950 flex flex-col overflow-hidden relative ${
+        <div className={`lg:col-span-2 border-r border-border/80 bg-gradient-to-b from-zinc-950 via-zinc-950 to-zinc-900/90 flex flex-col overflow-hidden relative ${
           activeTab === "code" ? "flex" : "hidden lg:flex"
         }`}>
           {activeFile ? (
             <>
-              {/* File tab header */}
-              <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-2 flex items-center justify-between shrink-0">
-                <span className="text-[11px] font-mono text-zinc-300 font-medium flex items-center gap-1.5">
-                  <FileCode className="h-3.5 w-3.5 text-indigo-400" />
-                  {activeFile.path}
+              {/* File tabs row */}
+              <div className="bg-zinc-900/95 border-b border-zinc-800 flex items-center overflow-x-auto shrink-0 scrollbar-none select-none">
+                {openTabs.map((tab) => {
+                  const isActive = activeFile?.path === tab.path;
+                  return (
+                    <button
+                      key={tab.path}
+                      onClick={() => handleSelectFile(tab)}
+                      className={`flex items-center gap-2 px-4 py-2.5 text-[11px] font-mono border-r border-zinc-850 transition-all select-none focus:outline-none relative ${
+                        isActive
+                          ? "bg-zinc-950 text-foreground font-semibold"
+                          : "bg-zinc-900/40 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/70"
+                      }`}
+                    >
+                      {isActive && (
+                        <span className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-indigo-500 to-primary" />
+                      )}
+                      <span className="flex items-center gap-1.5">
+                        {getFileIcon(tab.name, isActive)}
+                        {tab.name}
+                      </span>
+                      <span 
+                        onClick={(e) => handleCloseTab(e, tab)}
+                        className="p-0.5 rounded-full hover:bg-zinc-800/80 hover:text-rose-400 transition-colors text-[9px] font-bold text-zinc-500"
+                      >
+                        ✕
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* File detail breadcrumb bar */}
+              <div className="bg-zinc-950/40 border-b border-zinc-900/85 px-4 py-1.5 flex items-center justify-between shrink-0 select-none">
+                <span className="text-[10px] font-mono text-zinc-400 font-medium flex items-center gap-1">
+                  <span className="text-muted-foreground">{projectStructure.root.name}</span>
+                  <span className="text-zinc-700">/</span>
+                  <span className="text-primary/95 font-semibold">{activeFile.path}</span>
                 </span>
-                <span className="text-[10px] font-mono uppercase bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded select-none">
+                <span className="text-[9px] font-mono font-bold uppercase tracking-wider bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded border border-zinc-700/50">
                   {activeFile.language}
                 </span>
               </div>
 
               {/* Code Panel Display */}
-              <div className="flex-1 p-4 overflow-auto font-mono text-xs text-zinc-300 leading-relaxed flex items-start select-text selection:bg-indigo-500/30">
+              <div className="flex-1 p-4 overflow-auto font-mono text-[11px] sm:text-xs text-zinc-300 leading-relaxed flex items-start select-text selection:bg-indigo-500/30 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
                 {/* Line numbers mock panel */}
-                <div className="text-zinc-600 text-right pr-4 select-none border-r border-zinc-800/80 mr-4 font-mono w-6">
+                <div className="text-zinc-750 text-right pr-4 select-none border-r border-zinc-850 mr-4 font-mono w-6">
                   {activeFile.code.split("\n").map((_, i) => (
-                    <div key={i}>{i + 1}</div>
+                    <div key={i} className="h-5">{i + 1}</div>
                   ))}
                 </div>
                 {/* Real highlighted code */}
-                <pre className="overflow-visible whitespace-pre m-0">
+                <pre className="overflow-visible whitespace-pre m-0 flex-1">
                   <code 
+                    className="block font-mono leading-5 text-left"
                     dangerouslySetInnerHTML={{ 
                       __html: highlightCode(activeFile.code, activeFile.language) 
                     }} 
@@ -357,32 +444,44 @@ export default function CodeExplorer({ slug }: CodeExplorerProps) {
               </div>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-center p-8 text-zinc-500 gap-2">
-              <Layers className="h-10 w-10 text-zinc-700 animate-pulse" />
-              <p className="text-xs">{t({ id: "Pilih file dari direktori untuk membacanya.", en: "Select a file from directory to read contents." })}</p>
+            <div className="flex-1 flex flex-col items-center justify-center text-center p-8 text-zinc-500 gap-3">
+              <div className="h-12 w-12 rounded-2xl bg-zinc-900 border border-zinc-800/80 flex items-center justify-center shadow-lg shadow-black/40">
+                <Layers className="h-6 w-6 text-zinc-650 animate-pulse" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-zinc-400">{t({ id: "Pilih file dari direktori untuk membacanya.", en: "Select a file from directory to read contents." })}</p>
+                <p className="text-[10px] text-zinc-650 mt-0.5">{t({ id: "Atau buka kembali tab file yang ditutup.", en: "Or re-open a file tab from the explorer tree." })}</p>
+              </div>
             </div>
           )}
         </div>
 
         {/* Column 4: AI Code Explainer Box (Hidden on mobile unless active) */}
-        <div className={`lg:col-span-1 bg-secondary/15 p-4 flex flex-col overflow-hidden ${
+        <div className={`lg:col-span-1 bg-secondary/5 dark:bg-secondary/15 p-4 flex flex-col overflow-hidden ${
           activeTab === "ai" ? "flex" : "hidden lg:flex"
         }`}>
           {activeFile ? (
             <>
               {/* AI Header */}
               <div className="flex items-center justify-between border-b border-border/80 pb-3 mb-3 shrink-0">
-                <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-lg bg-gradient-to-tr from-indigo-500 to-primary text-white flex items-center justify-center shadow-sm">
-                    <Bot className="h-4.5 w-4.5" />
+                <div className="flex items-center gap-2 select-none">
+                  <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-primary text-white flex items-center justify-center shadow-md shadow-indigo-500/10 relative group">
+                    <span className="absolute -inset-0.5 rounded-xl bg-gradient-to-tr from-indigo-500 to-primary opacity-20 blur group-hover:opacity-40 transition-opacity" />
+                    <Bot className="h-4.5 w-4.5 relative z-10" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-foreground">Asisten AI RoketDev</h4>
-                    <p className="text-[9px] text-muted-foreground font-semibold uppercase tracking-wider">Gemini 2.5 Flash</p>
+                    <h4 className="text-[11px] font-extrabold text-foreground flex items-center gap-1">
+                      Asisten AI
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                      </span>
+                    </h4>
+                    <p className="text-[9px] text-muted-foreground/80 font-bold uppercase tracking-wider">Gemini 3.5 Flash</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1 select-none">
                   {/* Discuss Code in Live Chat */}
                   <button
                     type="button"
@@ -395,10 +494,10 @@ export default function CodeExplorer({ slug }: CodeExplorerProps) {
                       window.dispatchEvent(event);
                     }}
                     title="Diskusikan kode ini di Live Chat"
-                    className="p-1.5 rounded-lg border border-border hover:bg-secondary text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 text-[10px] font-bold"
+                    className="p-1.5 rounded-lg border border-border bg-card hover:bg-secondary text-muted-foreground hover:text-primary transition-all flex items-center gap-1 text-[10px] font-bold shadow-sm focus:outline-none"
                   >
-                    <MessageSquare className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Diskusi Chat</span>
+                    <MessageSquare className="h-3.5 w-3.5 text-primary/70" />
+                    <span className="hidden xl:inline">Diskusi</span>
                   </button>
 
                   {/* Ask Gemini Review button */}
@@ -406,7 +505,7 @@ export default function CodeExplorer({ slug }: CodeExplorerProps) {
                     onClick={() => handleAskAI()}
                     disabled={isAiLoading}
                     title="Minta Gemini mengulas baris kode secara mendalam"
-                    className="p-1.5 rounded-lg border border-border hover:bg-secondary text-muted-foreground hover:text-primary disabled:opacity-50 transition-colors"
+                    className="p-1.5 rounded-lg border border-border bg-card hover:bg-secondary text-muted-foreground hover:text-primary disabled:opacity-50 transition-all focus:outline-none shadow-sm"
                   >
                     <RefreshCw className={`h-3.5 w-3.5 ${isAiLoading ? 'animate-spin text-primary' : ''}`} />
                   </button>

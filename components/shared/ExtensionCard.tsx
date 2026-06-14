@@ -10,7 +10,7 @@ import { motion } from "framer-motion";
 import { useWishlist } from "@/hooks/useWishlist";
 
 interface ExtensionCardProps {
-  extension: ExtensionWithDetails | any;
+  extension: ExtensionWithDetails;
   onCompareToggle?: (id: string) => void;
   isComparing?: boolean;
 }
